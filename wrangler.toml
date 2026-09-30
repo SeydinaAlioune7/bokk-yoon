@@ -1,4 +1,4 @@
-# Bokk Yoon — déploiement : npx wrangler deploy (voir README)
+﻿# Bokk Yoon â€” dÃ©ploiement : npx wrangler deploy (voir README)
 name = "bokk-yoon"
 main = "src/worker.js"
 compatibility_date = "2025-09-01"
@@ -9,12 +9,13 @@ binding = "ASSETS"
 not_found_handling = "404-page"
 
 [vars]
-# Mettre "false" dès qu'un fournisseur SMS est branché (SMS_WEBHOOK_URL) : le code OTP ne sera plus renvoyé à l'écran.
+# Mettre "false" dÃ¨s qu'un fournisseur SMS est branchÃ© (SMS_WEBHOOK_URL) : le code OTP ne sera plus renvoyÃ© Ã  l'Ã©cran.
 DEMO_OTP = "true"
-# Numéro(s) du propriétaire (super-admin), séparés par des virgules. Les membres de l'équipe s'ajoutent depuis /admin/.
+# NumÃ©ro(s) du propriÃ©taire (super-admin), sÃ©parÃ©s par des virgules. Les membres de l'Ã©quipe s'ajoutent depuis /admin/.
 ADMIN_PHONES = "+221770000000"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "bokk-yoon-db"
-database_id = "REMPLACER_PAR_L_ID_DE_VOTRE_BASE_D1"
+database_id = "9af0ca17-fd0c-4ba2-9b0d-4c35d426a2b3"
+
