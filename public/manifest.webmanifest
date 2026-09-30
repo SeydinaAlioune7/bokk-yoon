@@ -1,0 +1,12 @@
+{
+  "name": "Bokk Yoon",
+  "short_name": "Bokk Yoon",
+  "description": "Covoiturage et envoi de colis entre particuliers au Sénégal",
+  "start_url": "/app/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBF7F0",
+  "theme_color": "#0B6E4F",
+  "lang": "fr",
+  "icons": [{ "src": "/assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

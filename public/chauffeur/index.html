@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bokk Yoon — Espace chauffeur</title>
+  <meta name="description" content="Publiez vos trajets, transportez passagers et colis, recevez vos gains.">
+  <meta name="theme-color" content="#0B6E4F">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>body { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); } main { padding: 20px 0 32px; }</style>
+</head>
+<body>
+  <header class="space-topbar"><div class="wrap">
+    <a class="logo" href="#/"><img src="../assets/icon.svg" alt="" width="34" height="34">Bokk Yoon <span class="space-tag driver">Chauffeur</span></a>
+    <div class="row" style="gap:8px;flex-wrap:nowrap"><span id="gps-pill" class="badge b-green" hidden></span><span id="mode-badge" class="badge" hidden></span><button class="bell" id="bell" hidden aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg><span class="dot" hidden></span></button></div>
+  </div></header>
+  <main id="view" class="narrow" tabindex="-1" aria-live="polite"></main>
+  <div class="tabbar"><nav aria-label="Navigation principale"><a href="#/" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</a><a href="#/trajets" data-tab="trips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14l-1.5-6a2 2 0 0 0-2-1.5h-7a2 2 0 0 0-2 1.5z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg>Trajets</a><a href="#/publier" data-tab="publish" class="plus"><span class="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></span>Publier</a><a href="#/gains" data-tab="gains"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/></svg>Gains</a><a href="#/profil" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profil</a></nav></div>
+  <script type="module" src="../assets/driver.js"></script>
+</body>
+</html>

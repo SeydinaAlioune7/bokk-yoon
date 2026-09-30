@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bokk Yoon — Espace équipe</title>
+  <meta name="description" content="Back-office Bokk Yoon.">
+  <meta name="theme-color" content="#0B6E4F">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/styles.css">
+  <meta name="robots" content="noindex">
+  <style>
+    .admin-grid { display: grid; grid-template-columns: 1fr; min-height: calc(100vh - 60px); }
+    #side { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--surface); scrollbar-width: none; }
+    #side:empty { display: none; }
+    #side a { flex: none; padding: 8px 12px; border-radius: 10px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: .9rem; white-space: nowrap; }
+    #side a:hover { background: var(--surface-2); }
+    #side a.on { background: var(--ink); color: var(--bg); }
+    .side-group { display: none; }
+    .side-search { display: none; }
+    .side-user, .side-foot { display: none; }
+    main#view { padding: 20px 16px 48px; max-width: 1180px; width: 100%; margin: 0 auto; min-width: 0; }
+    @media (min-width: 1000px) {
+      .admin-grid { grid-template-columns: 250px 1fr; }
+      #side { flex-direction: column; overflow: visible; border-bottom: 0; border-right: 1px solid var(--line); padding: 18px 14px; position: sticky; top: 60px; height: calc(100vh - 60px); }
+      #side a { padding: 8px 12px; font-size: .88rem; }
+      #side { overflow-y: auto; gap: 2px; }
+      .side-group { display: block; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 12px 12px 4px; }
+      .side-search { display: block; margin-bottom: 8px; }
+      .side-search input { padding: 8px 12px; font-size: .88rem; }
+      .side-count { margin-left: 6px; background: var(--terra, #C4553A); color: #fff; border-radius: 999px; padding: 0 7px; font-size: .72rem; }
+      .side-user { display: flex; gap: 10px; align-items: center; padding: 4px 6px 14px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+      .side-foot { display: flex; gap: 6px; margin-top: auto; padding-top: 12px; }
+    }
+    .chart { width: 100%; height: auto; display: block; }
+    .chart .grid { stroke: var(--line); stroke-width: 1; }
+    .chart .base { stroke: var(--muted); stroke-width: 1; opacity: .5; }
+    .chart .ax { fill: var(--muted); font-size: 11px; font-family: var(--font); }
+    .chart .lbl { fill: var(--ink); font-size: 11px; font-weight: 700; font-family: var(--font); }
+    .chart .mark { fill: var(--primary); }
+    .chart .bar:hover .mark, .chart .bar:focus .mark { fill: var(--primary-2); }
+    .chart .bar:focus { outline: none; }
+    .tip { position: absolute; width: 180px; background: var(--ink); color: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: .78rem; pointer-events: none; box-shadow: var(--shadow); }
+  </style>
+</head>
+<body>
+  <header class="space-topbar"><div class="wrap" style="width:auto;margin:0 16px">
+    <a class="logo" href="#/"><img src="../assets/icon.svg" alt="" width="34" height="34">Bokk Yoon <span class="space-tag admin">Équipe</span></a>
+    <span id="mode-badge" class="badge" hidden></span>
+  </div></header>
+  <div class="admin-grid"><nav id="side" aria-label="Back-office"></nav><main id="view" tabindex="-1" aria-live="polite"></main></div>
+  <script type="module" src="../assets/admin.js"></script>
+</body>
+</html>

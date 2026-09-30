@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bokk Yoon — Document</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    body { background: #e9e4da; padding: 16px 12px 40px; }
+    .toolbar { max-width: 210mm; margin: 0 auto 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .doc-wrap { overflow-x: auto; padding-bottom: 8px; }
+    @page { size: A4; margin: 0; }
+    body.label-mode { --page: label; }
+  </style>
+  <style id="print-css"></style>
+  <style id="page-size"></style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <a class="btn btn-ghost btn-sm" href="javascript:history.back()">← Retour</a>
+    <div class="row" style="gap:8px"><span id="hint" class="small muted"></span><button class="btn btn-primary btn-sm" id="print">Imprimer ou enregistrer en PDF</button></div>
+  </div>
+  <div class="doc-wrap"><div id="doc"><div class="skeleton" style="max-width:210mm;height:297mm;margin:0 auto"></div></div></div>
+  <script type="module" src="../assets/print.js"></script>
+</body>
+</html>
