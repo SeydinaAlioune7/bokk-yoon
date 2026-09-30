@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "dev.workers.dfbc_pom.bokk_yoon.twa",
+        "sha256_cert_fingerprints": ["C2:97:94:7C:9C:DF:AA:50:99:44:5E:6E:C6:18:7B:0E:D5:A6:D9:33:E1:34:04:BE:55:57:CF:EF:54:A2:69:9A"]
+      }
+    }]
