@@ -1,4 +1,4 @@
-// Bokk Yoon — Cloudflare Worker : sert le site (dossier public/) et l'API /api/* (base D1).
+// Bokk Yoon - Cloudflare Worker : sert le site (dossier public/) et l'API /api/* (base D1).
 import { handleApi } from '../public/assets/server.js';
 
 const JSON_HEADERS = {
@@ -7,7 +7,7 @@ const JSON_HEADERS = {
   'x-content-type-options': 'nosniff',
   'referrer-policy': 'strict-origin-when-cross-origin',
 };
-const MAX_BODY = 1_500_000; // logo, QR code de paiement (images) : jusqu'à ~1 Mo
+const MAX_BODY = 1_500_000;
 
 const json = (body, status = 200, extra = {}) => new Response(JSON.stringify(body), { status, headers: { ...JSON_HEADERS, ...extra } });
 
@@ -18,7 +18,7 @@ async function api(request, env) {
   }
   let body = {};
   if (['POST', 'PATCH', 'PUT'].includes(request.method)) {
-    if (Number(request.headers.get('content-length') || 0) > MAX_BODY) return json({ error: { code: 'TOO_LARGE', message: 'Requête trop volumineuse.' } }, 413);
+    if (Number(request.headers.get('content-length') || 0) > MAX_BODY) return json({ error: { code: 'TOO_LARGE', message: 'Requete trop volumineuse.' } }, 413);
     try { body = await request.json(); } catch { body = {}; }
   }
   const headers = Object.fromEntries([...request.headers].map(([k, v]) => [k.toLowerCase(), v]));
@@ -31,6 +31,12 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
     if (pathname === '/api' || pathname.startsWith('/api/')) return api(request, env);
-    return env.ASSETS.fetch(request); // pages, scripts, images
+    if (pathname === '/manifest.webmanifest') {
+      const res = await env.ASSETS.fetch(request);
+      const newHeaders = new Headers(res.headers);
+      newHeaders.set('content-type', 'application/manifest+json; charset=utf-8');
+      return new Response(res.body, { status: res.status, headers: newHeaders });
+    }
+    return env.ASSETS.fetch(request);
   },
 };
