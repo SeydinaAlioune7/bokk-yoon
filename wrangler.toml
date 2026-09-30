@@ -12,10 +12,11 @@ not_found_handling = "404-page"
 # Mettre "false" dÃ¨s qu'un fournisseur SMS est branchÃ© (SMS_WEBHOOK_URL) : le code OTP ne sera plus renvoyÃ© Ã  l'Ã©cran.
 DEMO_OTP = "true"
 # NumÃ©ro(s) du propriÃ©taire (super-admin), sÃ©parÃ©s par des virgules. Les membres de l'Ã©quipe s'ajoutent depuis /admin/.
-ADMIN_PHONES = "+221770000000"
+ADMIN_PHONES = "+221778561630"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "bokk-yoon-db"
 database_id = "9af0ca17-fd0c-4ba2-9b0d-4c35d426a2b3"
+
 
