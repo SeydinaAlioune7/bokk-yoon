@@ -681,7 +681,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     if (existing) {
       const msg = statusMessage(existing); if (msg) fail(403, 'ACCOUNT_' + existing.status.toUpperCase(), msg);
       // NumÃ©ro dÃ©clarÃ© propriÃ©taire (ADMIN_PHONES) : il peut toujours entrer dans l'espace Ã©quipe, mÃªme s'il a d'abord servi Ã  un compte client.
-      const ownerTakeover = space === 'admin' && admins.includes(phone) && existing.role === 'client';
+      const ownerTakeover = space === 'admin' && admins.includes(phone) && (existing.role === 'client' || existing.role === 'driver');
       if (!ownerTakeover && !SPACE_ROLES[space].includes(existing.role)) fail(403, 'WRONG_SPACE', `Ce numÃ©ro est rattachÃ© Ã  ${SPACE_LABEL[roleSpace(existing.role)]}. Chaque espace est sÃ©parÃ© : utilisez ${SPACE_LABEL[roleSpace(existing.role)]}${existing.role === 'client' ? ' ou un autre numÃ©ro pour devenir chauffeur' : ''}.`);
     } else if (space === 'admin' && !admins.includes(phone)) fail(403, 'TEAM_ONLY', 'AccÃ¨s rÃ©servÃ© Ã  l\'Ã©quipe Bokk Yoon.');
     if (seg[2] === 'request') {
@@ -705,7 +705,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     await q.run('DELETE FROM otps WHERE phone = ?', phone);
     let u = existing;
     if (u && body.email && body.email !== u.email) { await q.run('UPDATE users SET email = ? WHERE id = ?', str(body.email, 120).toLowerCase(), u.id); }
-    if (u && space === 'admin' && admins.includes(phone) && u.role === 'client') {
+    if (u && space === 'admin' && admins.includes(phone) && (u.role === 'client' || u.role === 'driver')) {
       await q.run("UPDATE users SET role = 'superadmin', ref = NULL WHERE id = ?", u.id);
       await setRef(q, 'users', u.id, 'superadmin');
       await q.run("DELETE FROM sessions WHERE user_id = ? AND space != 'admin'", u.id);
@@ -1835,6 +1835,7 @@ async function partnerRoutes({ q, env, is, r3, body, headers }) {
   }
   fail(404, 'ROUTE_NOT_FOUND', 'Route partenaire inconnue.');
 }
+
 
 
 
