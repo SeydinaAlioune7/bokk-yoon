@@ -368,7 +368,36 @@ async function news(ctx) {
     <label class="check small"><input type="checkbox" name="publish" ${x.status === 'PUBLISHED' ? 'checked' : ''}> Publier</label>
     <label class="check small" style="margin-top:6px"><input type="checkbox" name="notify"> Envoyer une notification au public choisi</label>
     <div class="row" style="margin-top:12px"><button class="btn btn-primary" type="submit">Enregistrer</button><button class="btn btn-ghost" type="button" data-close>Annuler</button></div></form>`,
-  (s, close) => s.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => { const imgFile = s.querySelector('#nimg')?.files[0]; if (imgFile) { const reader = new FileReader(); reader.onload = async () => { d.imageUrl = reader.result; await api('POST', '/admin/news', { ...d, id: x.id }); close(); toast(d.publish ? 'Article publié' : 'Brouillon enregistré'); ctx.render(); }; reader.readAsDataURL(imgFile); } else { await api('POST', '/admin/news', { ...d, id: x.id }); close(); toast(d.publish ? 'Article publié' : 'Brouillon enregistré'); ctx.render(); } }); }));
+  (s, close) => {
+    const form = s.querySelector('form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('[type=submit]');
+      if (btn) btn.disabled = true;
+      try {
+        const d = Object.fromEntries(new FormData(form));
+        d.publish = form.querySelector('[name=publish]')?.checked || false;
+        d.notify = form.querySelector('[name=notify]')?.checked || false;
+        const imgFile = s.querySelector('#nimg')?.files[0];
+        if (imgFile) {
+          d.imageUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(imgFile);
+          });
+        }
+        await api('POST', '/admin/news', { ...d, id: x.id });
+        close();
+        toast(d.publish ? 'Article publié' : 'Brouillon enregistré');
+        ctx.render();
+      } catch (err) {
+        const eb = form.querySelector('.err-box');
+        if (eb) { eb.textContent = err.message || 'Erreur'; eb.hidden = false; }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+  }
   root.querySelector('#nw').onclick = () => editor();
   on(root, '[data-ed]', 'click', (e) => editor(n.results.find((x) => x.id === e.target.dataset.ed)));
   on(root, '[data-un]', 'click', async (e) => { if (await act(() => api('POST', `/admin/news/${e.target.dataset.un}/unpublish`), 'Article dépublié')) ctx.render(); });
