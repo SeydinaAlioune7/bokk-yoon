@@ -6,14 +6,10 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 document.getElementById('yr').textContent = new Date().getFullYear();
 
 // Axes de lancement : prix fixes Bokk Yoon (grille du propriétaire si l'API répond, sinon formule par défaut)
-const corridors = [['Dakar', 'Thiès'], ['Dakar', 'Touba'], ['Dakar', 'Saint-Louis']];
 const icon = '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M10 90 C 40 60, 70 80, 60 40 S 80 10, 95 5" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>';
 const card = (a, b, q) => { const h = Math.floor(q.durationMin / 60), m = q.durationMin % 60;
   return `<article class="corridor">${icon}<div><p class="xs" style="margin:0;opacity:.85;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Aller et retour</p><h3>${a} ↔ ${b}</h3></div>
   <div class="cmeta"><span><b>${q.distanceKm} km</b>distance</span><span><b>${h ? h + ' h ' : ''}${String(m).padStart(2, '0')}</b>environ</span><span><b>${fcfa(q.seat)}</b>la place</span><span><b>${fcfa(q.parcel)}</b>le colis</span></div></article>`; };
-const box = document.getElementById('corridors');
-box.innerHTML = corridors.map(([a, b]) => { const q = quote(DEFAULT_SETTINGS, [], cityByName(a), cityByName(b)); return card(a, b, { ...q, seat: q.clientSeat, parcel: q.clientParcel }); }).join('');
-Promise.all(corridors.map(([a, b]) => api('GET', `/quote?from=${encodeURIComponent(a)}&to=${encodeURIComponent(b)}&weightKg=5`).then((q) => card(a, b, q)))).then((cards) => { box.innerHTML = cards.join(''); }).catch(() => {});
 
 // Couverture nationale
 (async () => {
@@ -114,7 +110,6 @@ const WA = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><pat
   try { c = await api('GET', '/company'); } catch { /* hors ligne */ }
   const wa = (t) => `https://wa.me/${String(c.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent(t)}`;
   const box = document.getElementById('lc-contact');
-  box.innerHTML = `<div class="contact-btns">${c.whatsapp ? `<a class="wa" href="${wa('Bonjour Bokk Yoon, ')}" target="_blank" rel="noopener">${WA}WhatsApp</a>` : ''}${c.email ? `<a href="mailto:${esc(c.email)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>E-mail</a>` : ''}${c.phone ? `<a href="tel:${esc(String(c.phone).replace(/\s/g, ''))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Appeler</a>` : ''}</div>
     <p class="small" style="margin-top:12px;opacity:.9">${esc(c.hours || '')}${c.email ? ' · ' + esc(c.email) : ''}${c.address ? '<br>' + esc(c.address) : ''}</p>`;
   if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.style.bottom = '20px'; a.href = wa('Bonjour Bokk Yoon, '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire sur WhatsApp'); a.innerHTML = WA; document.body.appendChild(a); }
   const cf = document.getElementById('cform');
