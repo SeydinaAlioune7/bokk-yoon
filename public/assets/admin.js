@@ -44,7 +44,7 @@ function renderNav(active) {
   const nav = document.getElementById('side');
   if (!me) { nav.innerHTML = ''; return; }
   nav.innerHTML = `<div class="side-user"><span class="avatar">${esc(initials(me.name))}</span><span><strong>${esc(me.name)}</strong><br><span class="xs">${me.role === 'superadmin' ? 'Propriétaire' : 'Équipe'}</span></span></div>
-    <form class="side-search" id="gs" role="search"><input name="q" type="search" placeholder="Réf., nom, téléphoneÔÇª" aria-label="Recherche globale"></form>
+    <form class="side-search" id="gs" role="search"><input name="q" type="search" placeholder="Réf., nom, téléphone…" aria-label="Recherche globale"></form>
     ${NAV.map(([k, h, l]) => (k ? `<a href="${h}" data-k="${k}" class="${k === (active || nav.dataset.active) ? 'on' : ''}">${l}${k === 'msg' && openTickets ? `<span class="side-count">${openTickets}</span>` : ''}${k === 'cash' && pendingClaims ? `<span class="side-count">${pendingClaims}</span>` : ''}</a>` : `<span class="side-group">${l}</span>`)).join('')}
     <div class="side-foot"><button class="btn btn-ghost btn-sm" id="th">Thème</button><button class="btn btn-ghost btn-sm" id="lo">Déconnexion</button></div>`;
   nav.querySelector('#th').onclick = toggleTheme;
@@ -156,7 +156,7 @@ async function members(ctx, role) {
     <div class="row between" style="margin-top:12px"><span class="small muted">${rows.length} membre(s)</span>${exportButtons([role === 'driver' ? 'chauffeurs' : 'clients'])}</div>
     <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Réf.</th><th>Membre</th><th>Téléphone</th><th>Ville</th>${role === 'driver' ? '<th>Dossier</th>' : ''}<th>Note</th><th>Terminés</th><th>Signalements</th><th>Avert.</th><th>Statut</th></tr></thead><tbody>
       ${rows.map((x) => `<tr><td>${refTag(x.ref)}</td><td><a href="#/membre/${x.id}"><strong>${esc(x.name || '—')}</strong></a></td><td>${esc(x.phone)}</td><td>${esc(x.city || '—')}</td>${role === 'driver' ? `<td>${badge(DRV, x.driver_status || 'PENDING')}</td>` : ''}
-        <td>${x.rating ? 'Ôÿà ' + String(x.rating).replace('.', ',') : '—'}</td><td class="tnum">${x.done}</td><td>${x.open_incidents ? `<span class="badge b-terra">${x.open_incidents} ouvert(s)</span>` : '—'}</td><td class="tnum">${x.warnings || '—'}</td>
+        <td>${x.rating ? 'ÿà ' + String(x.rating).replace('.', ',') : '—'}</td><td class="tnum">${x.done}</td><td>${x.open_incidents ? `<span class="badge b-terra">${x.open_incidents} ouvert(s)</span>` : '—'}</td><td class="tnum">${x.warnings || '—'}</td>
         <td>${badge(STATUS, x.status)}${x.suspended_until ? `<br><span class="xs muted">jusqu'au ${fmtDate(x.suspended_until)}</span>` : ''}</td></tr>`).join('') || `<tr><td colspan="10" class="muted">Aucun résultat.</td></tr>`}
     </tbody></table></div>`);
   root.querySelector('#sf').addEventListener('submit', (e) => { e.preventDefault(); go(`#/${role === 'driver' ? 'chauffeurs' : 'clients'}?` + qs({ tab, status: p.status, q: e.target.q.value })); });
@@ -181,13 +181,13 @@ async function member(ctx, id) {
       ${isSuper() && ['client', 'driver'].includes(x.role) && x.status !== 'blocked' ? '<button class="btn btn-ghost btn-sm" data-a="delete" style="color:var(--terra)">Supprimer le compte</button>' : ''}
       <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${waLink(x.phone, `Bonjour ${(x.name || '').split(' ')[0]}, ici l'équipe Bokk Yoon. `)}">WhatsApp</a>${x.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(x.email)}">E-mail</a>` : ''}</div>` : ''}
     <div class="grid grid-4" style="margin-top:16px">
-      ${kpi('Note', d.stats.ratingCount ? 'Ôÿà ' + String(d.stats.ratingAvg).replace('.', ',') : '—', d.stats.ratingCount + ' avis')}
+      ${kpi('Note', d.stats.ratingCount ? 'ÿà ' + String(d.stats.ratingAvg).replace('.', ',') : '—', d.stats.ratingCount + ' avis')}
       ${kpi(x.role === 'driver' ? 'Trajets terminés' : 'Trajets et envois', x.role === 'driver' ? d.stats.trips : d.stats.asClient, x.role === 'driver' ? d.stats.parcels + ' colis livrés' : '')}
       ${kpi('Annulations', d.stats.cancels, x.role === 'driver' ? d.stats.cancelRate + ' % des trajets' : '')}
       ${kpi('Avertissements', x.warnings, d.incidentsAbout.length + ' signalement(s) reçu(s)')}
     </div>
     ${drv ? `<div class="card" style="margin-top:16px"><div class="row between"><h3 style="margin:0">Dossier chauffeur</h3>${badge(DRV, drv.status)}</div>
-      <div class="grid grid-2 small" style="margin-top:10px"><div>Pièce : ${esc(drv.id_doc_type)} ÔÇóÔÇóÔÇóÔÇó${esc(drv.id_doc_last4)}<br>Permis ÔÇóÔÇóÔÇóÔÇó${esc(drv.license_last4)} depuis ${drv.license_since}<br>Assurance jusqu'au ${fmtDate(drv.insurance_until + 'T12:00:00Z')}</div>
+      <div class="grid grid-2 small" style="margin-top:10px"><div>Pièce : ${esc(drv.id_doc_type)} ÇóÇóÇóÇó${esc(drv.id_doc_last4)}<br>Permis ÇóÇóÇóÇó${esc(drv.license_last4)} depuis ${drv.license_since}<br>Assurance jusqu'au ${fmtDate(drv.insurance_until + 'T12:00:00Z')}</div>
       <div>Gains versés sur ${esc(PROVIDERS[drv.payout_provider])} · ${esc(drv.payout_phone)}<br>Ville : ${esc(drv.home_city)}<br>Envoyé le ${fmtDate(drv.submitted_at)}${drv.review_note ? '<br>Note : ' + esc(drv.review_note) : ''}</div></div>
       <p class="small" style="margin:10px 0 0">${d.vehicles.map((v) => `<strong>${esc(v.label)}</strong> · ${esc(v.plate)} · ${v.seats} places · ${v.cargo_kg} kg`).join('<br>')}</p>
       ${drv.status !== 'APPROVED' ? '<div class="row" style="margin-top:12px"><button class="btn btn-primary btn-sm" id="appr">Valider le dossier</button><button class="btn btn-ghost btn-sm" id="rej">Demander des corrections</button></div>' : ''}</div>` : ''}
@@ -198,7 +198,7 @@ async function member(ctx, id) {
     </div>
     <div class="card" style="margin-top:16px"><h3>Dernières réservations</h3><div class="table-wrap"><table><thead><tr><th>Réf.</th><th>Départ</th><th>Type</th><th>Trajet</th><th>Prix client</th><th>Part chauffeur</th><th>Statut</th></tr></thead><tbody>
       ${d.bookings.map((b) => `<tr><td>${refTag(b.ref)}</td><td>${fmtDT(b.departure_at)}</td><td>${b.kind === 'PARCEL' ? 'Colis' : 'Place'}</td><td>${esc(b.from_city)} ➔ ${esc(b.to_city)}</td><td class="tnum">${fcfa(b.price)}</td><td class="tnum">${fcfa(b.driver_pay)}</td><td>${badge(BOOKING, b.status)}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Aucune.</td></tr>'}</tbody></table></div></div>
-    ${d.reviews.length ? `<div class="card" style="margin-top:16px"><h3>Avis reçus</h3>${d.reviews.map((r) => `<div class="row between small" style="margin-bottom:8px;flex-wrap:nowrap"><span>${'Ôÿà'.repeat(r.rating)} <strong>${esc(r.author)}</strong> ${esc(r.comment)} ${r.hidden ? '<span class="badge">masqué</span>' : ''}</span>${r.hidden ? '' : `<button class="btn btn-ghost btn-sm" data-hide="${r.id}">Masquer</button>`}</div>`).join('')}</div>` : ''}`);
+    ${d.reviews.length ? `<div class="card" style="margin-top:16px"><h3>Avis reçus</h3>${d.reviews.map((r) => `<div class="row between small" style="margin-bottom:8px;flex-wrap:nowrap"><span>${'ÿà'.repeat(r.rating)} <strong>${esc(r.author)}</strong> ${esc(r.comment)} ${r.hidden ? '<span class="badge">masqué</span>' : ''}</span>${r.hidden ? '' : `<button class="btn btn-ghost btn-sm" data-hide="${r.id}">Masquer</button>`}</div>`).join('')}</div>` : ''}`);
   const days = '<div class="field"><label for="dy">Durée de la suspension</label><select id="dy" name="days"><option value="1">1 jour</option><option value="3">3 jours</option><option value="7" selected>7 jours</option><option value="30">30 jours</option>' + (isSuper() ? '<option value="90">90 jours</option><option value="365">1 an</option>' : '') + '</select></div>';
   const consequences = x.role === 'driver' ? '<p class="small muted">Ses trajets à venir sont retirés et ses clients remboursés intégralement. Il ne peut plus se connecter.</p>' : '<p class="small muted">Ses réservations à venir sont annulées et remboursées. Il ne peut plus se connecter.</p>';
   on(root, '[data-a]', 'click', (e) => {
@@ -207,7 +207,7 @@ async function member(ctx, id) {
     if (a === 'suspend') reasonSheet(`Suspendre ${x.name}`, (f) => api('POST', `/admin/users/${id}/suspend`, { ...f, days: Number(f.days) }), { extra: days + consequences, cta: 'Suspendre' });
     if (a === 'block') reasonSheet(`Bloquer ${x.name} définitivement`, (f) => api('POST', `/admin/users/${id}/block`, f), { extra: consequences, cta: 'Bloquer' });
     if (a === 'reactivate') reasonSheet(`Réactiver ${x.name}`, (f) => api('POST', `/admin/users/${id}/reactivate`, f), { cta: 'Réactiver' });
-    if (a === 'delete') reasonSheet(`Supprimer le compte de ${x.name}`, (f) => api('POST', `/admin/users/${id}/delete`, f), { extra: '<p class="small muted">À utiliser à la demande du membre. Ses données personnelles sont effacées et son numéro est libéré ; factures et historique sont conservés de façon anonyme. Pour écarter un fraudeur, utilisez plutôt ┬½ Bloquer ┬╗ : son numéro reste interdit.</p>', label: 'Motif (ex. demande du client par WhatsApp)', cta: 'Supprimer définitivement' });
+    if (a === 'delete') reasonSheet(`Supprimer le compte de ${x.name}`, (f) => api('POST', `/admin/users/${id}/delete`, f), { extra: '<p class="small muted">À utiliser à la demande du membre. Ses données personnelles sont effacées et son numéro est libéré ; factures et historique sont conservés de façon anonyme. Pour écarter un fraudeur, utilisez plutôt ½ Bloquer ╗ : son numéro reste interdit.</p>', label: 'Motif (ex. demande du client par WhatsApp)', cta: 'Supprimer définitivement' });
     if (a === 'note') reasonSheet('Note interne', (f) => api('POST', `/admin/users/${id}/note`, { body: f.reason }), { label: 'Note (visible par l\'équipe uniquement)', cta: 'Ajouter' });
   });
   root.querySelector('#appr')?.addEventListener('click', async () => { if (await act(() => api('POST', `/admin/drivers/${id}/review`, { decision: 'APPROVED' }), 'Dossier validé')) ctx.render(); });
@@ -248,11 +248,11 @@ async function issues(ctx) {
   const root = ctx.set(`<h2>Litiges et signalements</h2>
     <h3 style="margin-top:14px">Signalements de comportement</h3><div class="stack">
     ${inc.results.map((i) => `<div class="card"><div class="row between"><strong>${refTag(i.ref)} ${INC[i.category]} · <a href="#/membre/${i.target_id}">${esc(i.target_name)}</a> <span class="small muted">(${i.target_role === 'driver' ? 'chauffeur' : 'client'}, ${i.target_total} signalement(s), ${i.target_warnings} avert.)</span></strong>${i.status === 'OPEN' ? '<span class="badge b-terra">Ouvert</span>' : '<span class="badge">Clos</span>'}</div>
-      <p class="small" style="margin:6px 0">┬½ ${esc(i.details)} ┬╗</p><p class="xs muted" style="margin:0">Signalé par ${i.reporter_id === i.target_id ? 'le système' : esc(i.reporter_name)} · ${fmtDT(i.created_at)}${i.action_taken ? ' · Suite : ' + esc(i.action_taken) : ''}</p>
+      <p class="small" style="margin:6px 0">½ ${esc(i.details)} ╗</p><p class="xs muted" style="margin:0">Signalé par ${i.reporter_id === i.target_id ? 'le système' : esc(i.reporter_name)} · ${fmtDT(i.created_at)}${i.action_taken ? ' · Suite : ' + esc(i.action_taken) : ''}</p>
       ${i.status === 'OPEN' ? `<div class="row" style="margin-top:10px"><button class="btn btn-ghost btn-sm" data-i="${i.id}" data-act="NONE">Classer sans suite</button><button class="btn btn-ghost btn-sm" data-i="${i.id}" data-act="WARN">Avertir</button><button class="btn btn-ghost btn-sm" data-i="${i.id}" data-act="SUSPEND">Suspendre</button>${isSuper() ? `<button class="btn btn-danger btn-sm" data-i="${i.id}" data-act="BLOCK">Bloquer</button>` : ''}</div>` : ''}</div>`).join('') || '<div class="card empty">Aucun signalement.</div>'}</div>
     <h3 style="margin-top:22px">Réclamations (remboursements)</h3><div class="stack">
     ${dis.results.map((d) => `<div class="card"><div class="row between"><strong>${refTag(d.ref)} ${DISP[d.reason]} · ${esc(d.from_city)} ➔ ${esc(d.to_city)}</strong>${d.status === 'OPEN' ? '<span class="badge b-terra">Ouverte</span>' : '<span class="badge">Close</span>'}</div>
-      <p class="small" style="margin:6px 0">┬½ ${esc(d.details)} ┬╗</p><p class="xs muted" style="margin:0">Par ${esc(d.opened_by_name)} · chauffeur <a href="#/membre/${d.driver_id}">${esc(d.driver_name)}</a> · payé ${fcfa(d.price)} · ${d.messages} message(s) · ${fmtDT(d.created_at)}${d.decision ? ' · ' + esc(d.decision) : ''}</p>
+      <p class="small" style="margin:6px 0">½ ${esc(d.details)} ╗</p><p class="xs muted" style="margin:0">Par ${esc(d.opened_by_name)} · chauffeur <a href="#/membre/${d.driver_id}">${esc(d.driver_name)}</a> · payé ${fcfa(d.price)} · ${d.messages} message(s) · ${fmtDT(d.created_at)}${d.decision ? ' · ' + esc(d.decision) : ''}</p>
       ${d.status === 'OPEN' ? `<div class="row" style="margin-top:10px"><button class="btn btn-primary btn-sm" data-ref="${d.id}" data-p="${d.price}">Rembourser le client</button><button class="btn btn-ghost btn-sm" data-rej="${d.id}">Rejeter (payer le chauffeur)</button></div>` : ''}</div>`).join('') || '<div class="card empty">Aucune réclamation.</div>'}</div>`);
   on(root, '[data-i]', 'click', (e) => {
     const a = e.target.dataset.act;
@@ -298,7 +298,7 @@ async function pricing(ctx) {
       <div class="grid grid-2">
         <div class="field"><label for="a">Place : FCFA par km</label><input id="a" name="seatPerKm" type="number" value="${P.seatPerKm}" ${ro}></div>
         <div class="field"><label for="b">Place : prix minimum</label><input id="b" name="seatMin" type="number" value="${P.seatMin}" ${ro}></div>
-        <div class="field"><label for="c">Colis Ôëñ 5 kg : FCFA par km</label><input id="c" name="parcelPerKm" type="number" value="${P.parcelPerKm}" ${ro}></div>
+        <div class="field"><label for="c">Colis ëñ 5 kg : FCFA par km</label><input id="c" name="parcelPerKm" type="number" value="${P.parcelPerKm}" ${ro}></div>
         <div class="field"><label for="d">Colis : prix minimum</label><input id="d" name="parcelMin" type="number" value="${P.parcelMin}" ${ro}></div>
         <div class="field"><label for="e">Colis : + % par kg au-delà de 5 kg</label><input id="e" name="parcelExtraKgPct" type="number" value="${P.parcelExtraKgPct}" ${ro}></div>
         <div class="field"><label for="f">Part reversée au chauffeur (%)</label><input id="f" name="driverSharePct" type="number" min="30" max="100" value="${P.driverSharePct}" ${ro}></div>
@@ -316,7 +316,7 @@ async function pricing(ctx) {
     </div>
     <div class="card" style="margin-top:16px"><div class="row between"><h3 style="margin:0">Grille par axe</h3>${isSuper() ? '<button class="btn btn-primary btn-sm" id="add">Ajouter un axe</button>' : ''}</div>
       <div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Axe (aller et retour)</th><th>Place client</th><th>Place chauffeur</th><th>Marge place</th><th>Colis client</th><th>Colis chauffeur</th><th>Marge colis</th><th></th></tr></thead><tbody>
-      ${r.tariffs.map((t) => `<tr><td>${esc(t.origin)} Ôåö ${esc(t.dest)}</td><td class="tnum">${fcfa(t.client_seat)}</td><td class="tnum">${fcfa(t.driver_seat)}</td><td class="tnum money-in">${fcfa(t.client_seat - t.driver_seat)}</td><td class="tnum">${fcfa(t.client_parcel)}</td><td class="tnum">${fcfa(t.driver_parcel)}</td><td class="tnum money-in">${fcfa(t.client_parcel - t.driver_parcel)}</td>
+      ${r.tariffs.map((t) => `<tr><td>${esc(t.origin)} åö ${esc(t.dest)}</td><td class="tnum">${fcfa(t.client_seat)}</td><td class="tnum">${fcfa(t.driver_seat)}</td><td class="tnum money-in">${fcfa(t.client_seat - t.driver_seat)}</td><td class="tnum">${fcfa(t.client_parcel)}</td><td class="tnum">${fcfa(t.driver_parcel)}</td><td class="tnum money-in">${fcfa(t.client_parcel - t.driver_parcel)}</td>
         <td>${isSuper() ? `<button class="btn btn-ghost btn-sm" data-edit='${esc(JSON.stringify(t))}'>Modifier</button><button class="btn btn-ghost btn-sm" data-del="${t.id}">Supprimer</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">Aucun axe spécifique : la formule s\'applique partout.</td></tr>'}</tbody></table></div></div>
     <div class="card" style="margin-top:16px" id="ptypes"></div>`);
   parcelTypesBox(root.querySelector('#ptypes'), ctx);
@@ -327,7 +327,7 @@ async function pricing(ctx) {
     box.innerHTML = `<p class="small muted">${q.distanceKm} km · ~${fmtDur(q.durationMin)} · source : ${q.source === 'grille' ? 'grille par axe' : 'formule au km'}</p>
       <div class="table-wrap"><table><thead><tr><th></th><th>Client paie</th><th>Chauffeur reçoit</th><th>Marge</th></tr></thead><tbody>
       <tr><td>Place</td><td class="tnum">${fcfa(q.clientSeat)}</td><td class="tnum">${fcfa(q.driverSeat)}</td><td class="tnum money-in">${fcfa(q.clientSeat - q.driverSeat)}</td></tr>
-      <tr><td>Colis Ôëñ 5 kg</td><td class="tnum">${fcfa(q.clientParcel)}</td><td class="tnum">${fcfa(q.driverParcel)}</td><td class="tnum money-in">${fcfa(q.clientParcel - q.driverParcel)}</td></tr></tbody></table></div>`;
+      <tr><td>Colis ëñ 5 kg</td><td class="tnum">${fcfa(q.clientParcel)}</td><td class="tnum">${fcfa(q.driverParcel)}</td><td class="tnum money-in">${fcfa(q.clientParcel - q.driverParcel)}</td></tr></tbody></table></div>`;
   };
   ['#qa', '#qb'].forEach((s) => root.querySelector(s).addEventListener('change', sim)); sim();
   root.querySelector('#sf').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => {
@@ -338,7 +338,7 @@ async function pricing(ctx) {
   const edit = (t = {}) => sheet(`<form novalidate>${errBox}<h3>${t.id ? 'Modifier' : 'Ajouter'} un axe</h3>
     <div class="grid grid-2"><div class="field"><label for="to">De</label><select id="to" name="origin">${cityOptions(t.origin || 'Dakar')}</select></div><div class="field"><label for="td">À</label><select id="td" name="dest">${cityOptions(t.dest || 'Thiès')}</select></div>
       <div class="field"><label for="t1">Place : prix client</label><input id="t1" name="clientSeat" type="number" value="${t.client_seat ?? ''}" required></div><div class="field"><label for="t2">Place : part chauffeur</label><input id="t2" name="driverSeat" type="number" value="${t.driver_seat ?? ''}" required></div>
-      <div class="field"><label for="t3">Colis Ôëñ 5 kg : prix client</label><input id="t3" name="clientParcel" type="number" value="${t.client_parcel ?? ''}" required></div><div class="field"><label for="t4">Colis : part chauffeur</label><input id="t4" name="driverParcel" type="number" value="${t.driver_parcel ?? ''}" required></div></div>
+      <div class="field"><label for="t3">Colis ëñ 5 kg : prix client</label><input id="t3" name="clientParcel" type="number" value="${t.client_parcel ?? ''}" required></div><div class="field"><label for="t4">Colis : part chauffeur</label><input id="t4" name="driverParcel" type="number" value="${t.driver_parcel ?? ''}" required></div></div>
     <p class="xs muted">Valable dans les deux sens. S'applique aux nouvelles réservations.</p>
     <div class="row"><button class="btn btn-primary" type="submit">Enregistrer</button><button class="btn btn-ghost" type="button" data-close>Annuler</button></div></form>`,
   (s, close) => s.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => { await api('POST', '/admin/tariffs', { ...d, clientSeat: +d.clientSeat, driverSeat: +d.driverSeat, clientParcel: +d.clientParcel, driverParcel: +d.driverParcel }); close(); toast('Axe enregistré'); ctx.render(); }); }));
@@ -375,7 +375,7 @@ async function news(ctx) {
   on(root, '[data-dl]', 'click', (e) => confirmSheet('Supprimer cet article ?', 'Cette action est définitive.', async () => { await api('POST', `/admin/news/${e.target.dataset.dl}/delete`); ctx.render(); }, 'Supprimer'));
   on(root, '[data-end]', 'click', async (e) => { if (await act(() => api('POST', `/admin/alerts/${e.target.dataset.end}/end`), 'Alerte terminée')) ctx.render(); });
   root.querySelector('#al').onclick = () => sheet(`<form novalidate>${errBox}<h3>Nouvelle alerte route</h3>
-    <div class="field"><label for="aa">Zone</label><select id="aa" name="area"><option>National</option><optgroup label="Régions">${REGIONS.map((r) => `<option>${esc(r)}</option>`).join('')}</optgroup>${cityOptions('').replace('<option value="">ChoisirÔÇª</option>', '')}</select></div>
+    <div class="field"><label for="aa">Zone</label><select id="aa" name="area"><option>National</option><optgroup label="Régions">${REGIONS.map((r) => `<option>${esc(r)}</option>`).join('')}</optgroup>${cityOptions('').replace('<option value="">Choisir…</option>', '')}</select></div>
     <div class="grid grid-2"><div class="field"><label for="lv">Niveau</label><select id="lv" name="level"><option value="INFO">Information</option><option value="ATTENTION">Attention</option><option value="DANGER">Danger</option></select></div>
       <div class="field"><label for="hr">Durée</label><select id="hr" name="hours"><option value="6">6 h</option><option value="24" selected>24 h</option><option value="72">3 jours</option><option value="168">7 jours</option></select></div></div>
     <div class="field"><label for="ms">Message</label><textarea id="ms" name="message" required maxlength="300" placeholder="Ex. Travaux à la sortie de Thiès, prévoir 30 minutes de plus."></textarea></div>
@@ -424,14 +424,14 @@ function bindExports(root) {
     try { const r = await api('GET', '/admin/export/' + b.dataset.export); downloadCsv(r.filename, r.csv); } catch (er) { toast(er.message); } finally { b.disabled = false; } });
 }
 
-// ---------- Types d'envoi (passeport, enveloppeÔÇª) ----------
+// ---------- Types d'envoi (passeport, enveloppe…) ----------
 async function parcelTypesBox(box, ctx) {
   const r = await api('GET', '/admin/parcel-types');
   const q = await api('GET', '/admin/quote?' + qs({ from: 'Dakar', to: 'Saint-Louis' }));
   const km = q.distanceKm;
   const priceAt = (t, k) => ({ c: Math.round(t.client_base + t.client_per_km * k), d: Math.round(t.driver_base + t.driver_per_km * k) });
   box.innerHTML = `<div class="row between"><h3 style="margin:0">Types d'envoi et forfaits</h3>${isSuper() ? '<button class="btn btn-primary btn-sm" id="addt">Nouveau type d\'envoi</button>' : ''}</div>
-    <p class="small muted">Créez des envois <strong>sans pesée à prix forfaitaire</strong> (passeport, enveloppe, clés, carte griseÔÇª). Prix = forfait de base + montant par km. Exemple calculé sur Dakar ➔ Saint-Louis (${km} km), avant arrondi.</p>
+    <p class="small muted">Créez des envois <strong>sans pesée à prix forfaitaire</strong> (passeport, enveloppe, clés, carte grise…). Prix = forfait de base + montant par km. Exemple calculé sur Dakar ➔ Saint-Louis (${km} km), avant arrondi.</p>
     <div class="table-wrap"><table><thead><tr><th>Type</th><th>Mode</th><th>Client : base + /km</th><th>Chauffeur : base + /km</th><th>Ex. client</th><th>Ex. chauffeur</th><th>Marge</th><th>Statut</th><th></th></tr></thead><tbody>
     ${r.results.map((t) => { const x = priceAt(t, km); return `<tr style="${t.active ? '' : 'opacity:.55'}"><td><strong>${esc(t.label)}</strong><br><code class="xs">${esc(t.code)}</code>${t.id_check ? ' <span class="badge b-sky">pièce vérifiée</span>' : ''}</td>
       <td>${t.mode === 'FLAT' ? 'Forfait, sans poids' : 'Au poids (formule)'}</td>
@@ -469,7 +469,7 @@ async function searchPage(ctx) {
   const u = await guard(ctx); if (!u) return;
   const term = ctx.params.q || '';
   const r = term ? await api('GET', '/admin/search?' + qs({ q: term })) : { results: [] };
-  const root = ctx.set(`<h2>Recherche</h2><form id="sq" class="row" style="flex-wrap:nowrap;max-width:560px"><input name="q" value="${esc(term)}" placeholder="CL00012, RES-2026-00031, COL-ÔÇª, FAC-ÔÇª, nom, téléphone" aria-label="Recherche"><button class="btn btn-primary btn-sm">Chercher</button></form>
+  const root = ctx.set(`<h2>Recherche</h2><form id="sq" class="row" style="flex-wrap:nowrap;max-width:560px"><input name="q" value="${esc(term)}" placeholder="CL00012, RES-2026-00031, COL-…, FAC-…, nom, téléphone" aria-label="Recherche"><button class="btn btn-primary btn-sm">Chercher</button></form>
     <p class="xs muted" style="margin-top:8px">Préfixes : CL client · CH chauffeur · EQ équipe · TR trajet · COL colis · RES réservation · VER versement · LIT réclamation · SIG signalement · SUP message · FAC facture · AV avoir.</p>
     <div class="stack" style="margin-top:12px">${r.results.map((x) => `<a class="card card-link row between" href="${x.link}" ${x.link.startsWith('..') ? 'target="_blank" rel="noopener"' : ''} style="flex-wrap:nowrap"><span><span class="badge">${esc(x.kind)}</span> ${refTag(x.ref)}<br><span class="small">${esc(x.label)}</span></span><span>➔</span></a>`).join('') || (term ? '<div class="card empty">Aucun résultat.</div>' : '')}</div>`);
   root.querySelector('#sq').addEventListener('submit', (e) => { e.preventDefault(); go('#/recherche?' + qs({ q: e.target.q.value.trim() })); });
@@ -519,7 +519,7 @@ async function feedbackPage(ctx) {
   const n = r.results.length, pro = r.results.filter((x) => x.score >= 9).length, det = r.results.filter((x) => x.score <= 6).length;
   const nps = n ? Math.round(((pro - det) / n) * 100) : null;
   const dist = Array.from({ length: 11 }, (_, i) => r.results.filter((x) => x.score === i).length), mx = Math.max(1, ...dist);
-  const root = ctx.set(`<h2>Retours clients</h2><p class="muted small">Formulaire envoyé au client à la fin de chaque trajet : ┬½ Recommanderiez-vous Bokk Yoon ? ┬╗ (0 à 10). Une note de 6 ou moins vous est signalée.</p>
+  const root = ctx.set(`<h2>Retours clients</h2><p class="muted small">Formulaire envoyé au client à la fin de chaque trajet : ½ Recommanderiez-vous Bokk Yoon ? ╗ (0 à 10). Une note de 6 ou moins vous est signalée.</p>
     <div class="grid grid-4">${kpi('NPS', nps === null ? '—' : (nps > 0 ? '+' : '') + nps, 'promoteurs − détracteurs')}${kpi('Promoteurs (9-10)', pro, n ? Math.round((pro / n) * 100) + ' %' : '')}${kpi('Passifs (7-8)', n - pro - det)}${kpi('Détracteurs (0-6)', det, n ? Math.round((det / n) * 100) + ' %' : '')}</div>
     <div class="card" style="margin-top:16px"><h3>Répartition des notes</h3><div style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px;align-items:end;height:140px">${dist.map((v, i) => `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%" title="${v} retour(s) à ${i}/10"><span class="xs tnum">${v || ''}</span><span style="width:100%;height:${Math.round((v / mx) * 100)}%;min-height:${v ? 4 : 0}px;border-radius:4px 4px 0 0;background:${i >= 9 ? 'var(--primary)' : i >= 7 ? 'var(--sun)' : 'var(--terra)'}"></span><span class="xs muted">${i}</span></div>`).join('')}</div>
       <p class="xs muted" style="margin:8px 0 0">Vert : promoteurs · jaune : passifs · rouge : détracteurs.</p></div>
@@ -585,10 +585,10 @@ async function cashPage(ctx) {
     <div class="grid grid-2" style="margin-top:10px">
       <div class="field"><label for="${key}-num">Numéro ${label}</label><input id="${key}-num" name="${key}_number" value="${esc(m.number)}" placeholder="77 000 00 00" ${ro}></div>
       <div class="field"><label for="${key}-name">Nom affiché au client</label><input id="${key}-name" name="${key}_name" value="${esc(m.name)}" placeholder="Bokk Yoon" ${ro}></div></div>
-    <div class="field"><label for="${key}-link">Lien de paiement (rempli automatiquement si le QR en contient un)</label><input id="${key}-link" name="${key}_link" value="${esc(m.link)}" placeholder="${key === 'wave' ? 'https://pay.wave.com/m/ÔÇª' : 'https://ÔÇª'}" ${ro}><div class="hint">Sur téléphone, le client ne peut pas scanner l'écran qu'il regarde : ce lien ouvre directement l'application.</div></div>
+    <div class="field"><label for="${key}-link">Lien de paiement (rempli automatiquement si le QR en contient un)</label><input id="${key}-link" name="${key}_link" value="${esc(m.link)}" placeholder="${key === 'wave' ? 'https://pay.wave.com/m/…' : 'https://…'}" ${ro}><div class="hint">Sur téléphone, le client ne peut pas scanner l'écran qu'il regarde : ce lien ouvre directement l'application.</div></div>
   </div>`;
   const root = ctx.set(`<h2>Encaissements Wave / Orange Money</h2>
-    <p class="muted small">Les clients paient sur <strong>votre QR code Wave</strong> (compte personnel ou marchand), puis déclarent l'ID de la transaction. Vous vérifiez dans votre application Wave ou Orange Money, puis vous confirmez ici : la réservation passe en ┬½ payée ┬╗, le client reçoit son code, la facture est émise et le chauffeur est prévenu.</p>
+    <p class="muted small">Les clients paient sur <strong>votre QR code Wave</strong> (compte personnel ou marchand), puis déclarent l'ID de la transaction. Vous vérifiez dans votre application Wave ou Orange Money, puis vous confirmez ici : la réservation passe en ½ payée ╗, le client reçoit son code, la facture est émise et le chauffeur est prévenu.</p>
     <form id="pf" novalidate>${errBox}
       <div class="card" style="margin-bottom:16px"><div class="row between"><div><h3 style="margin:0">Mode d'encaissement</h3><p class="small muted" style="margin:4px 0 0">${ps.mode === 'QR' ? 'Actif : les clients paient sur vos QR codes.' : 'Démonstration : les paiements sont simulés (aucun argent réel).'}</p></div>
         <div class="pill-nav" id="mode">${[['SIMULATION', 'Simulation (démo)'], ['QR', 'QR code réel']].map(([k, l]) => `<button type="button" class="btn btn-ghost btn-sm ${k === ps.mode ? 'on' : ''}" data-mode="${k}" ${ro}>${l}</button>`).join('')}</div></div></div>
@@ -607,10 +607,10 @@ async function cashPage(ctx) {
   const f = root.querySelector('#pf'); let mode = ps.mode; const qrs = { wave: ps.wave.qr, orange: ps.orange.qr };
   root.querySelector('#mode').addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (!b || ro) return; mode = b.dataset.mode; root.querySelectorAll('#mode [data-mode]').forEach((x) => x.classList.toggle('on', x === b)); });
   on(root, '[data-up]', 'change', async (e) => { const key = e.target.dataset.up, file = e.target.files[0]; if (!file) return;
-    const info = root.querySelector(`[data-read="${key}"]`); info.textContent = 'Lecture du QR codeÔÇª';
+    const info = root.querySelector(`[data-read="${key}"]`); info.textContent = 'Lecture du QR code…';
     try { const r = await readQrImage(file); qrs[key] = r.data; root.querySelector(`[data-m="${key}"] .qr-drop`).innerHTML = `<img src="${r.data}" alt="QR code" class="qr-img">`; f[key + '_enabled'].checked = true;
-      if (r.text && /^https:\/\//.test(r.text)) { f[key + '_link'].value = r.text; info.innerHTML = `QR code lu Ô£ô Lien détecté : <code>${esc(r.text.slice(0, 60))}${r.text.length > 60 ? 'ÔÇª' : ''}</code>`; }
-      else info.textContent = r.text ? `QR code lu Ô£ô (contenu : ${r.text.slice(0, 40)})` : 'Image chargée. Contenu du QR non lu : vérifiez qu\'il est net et bien cadré (l\'image sera quand m¬me affichée).';
+      if (r.text && /^https:\/\//.test(r.text)) { f[key + '_link'].value = r.text; info.innerHTML = `QR code lu £ô Lien détecté : <code>${esc(r.text.slice(0, 60))}${r.text.length > 60 ? '…' : ''}</code>`; }
+      else info.textContent = r.text ? `QR code lu £ô (contenu : ${r.text.slice(0, 40)})` : 'Image chargée. Contenu du QR non lu : vérifiez qu\'il est net et bien cadré (l\'image sera quand m¬me affichée).';
       toast('QR code chargé : pensez à enregistrer'); } catch (er) { info.textContent = er.message; } });
   on(root, '[data-rmqr]', 'click', (e) => { const k = e.target.dataset.rmqr; qrs[k] = ''; root.querySelector(`[data-m="${k}"] .qr-drop`).innerHTML = '<div class="qr-empty">QR retiré (enregistrez)</div>'; });
   f.addEventListener('submit', (e) => { e.preventDefault(); submitting(f, async (d) => {
@@ -632,11 +632,11 @@ async function invoices(ctx) {
   const r = await api('GET', '/admin/invoices?' + qs({ kind: p.kind, q: p.q }));
   const T = r.totals;
   const root = ctx.set(`<div class="row between"><h2 style="margin:0">Factures</h2><div class="row" style="gap:6px">${exportButtons(['factures'])}<button class="btn btn-primary btn-sm" id="ni">Nouvelle facture</button></div></div>
-    <p class="muted small">Chaque paiement génère automatiquement une facture numérotée (FAC-année-n┬░), chaque remboursement un avoir (AV-ÔÇª). Vous pouvez aussi établir des factures manuelles (entreprise, transport groupéÔÇª). Mise en page : <a href="#/entreprise">Entreprise et facture</a>.</p>
+    <p class="muted small">Chaque paiement génère automatiquement une facture numérotée (FAC-année-n░), chaque remboursement un avoir (AV-…). Vous pouvez aussi établir des factures manuelles (entreprise, transport groupé…). Mise en page : <a href="#/entreprise">Entreprise et facture</a>.</p>
     <div class="grid grid-4">${kpi('Total facturé', fcfa(T.billed))}${kpi('Avoirs', fcfa(Math.abs(T.credited)))}${kpi('Net', fcfa(T.billed + T.credited))}${kpi('À encaisser', fcfa(T.due), 'factures manuelles non payées')}</div>
     <div class="row" style="margin:14px 0 10px">${[['', 'Toutes'], ['INVOICE', 'Réservations'], ['CREDIT_NOTE', 'Avoirs'], ['MANUAL', 'Manuelles']].map(([k, l]) => `<a class="btn btn-ghost btn-sm ${k === (p.kind || '') ? 'on' : ''}" href="#/factures?${qs({ kind: k, q: p.q })}">${l}</a>`).join('')}
-      <form id="fq" class="row" style="flex-wrap:nowrap;margin-left:auto"><input name="q" value="${esc(p.q || '')}" placeholder="N┬░, client, réservation" aria-label="Chercher une facture"><button class="btn btn-ghost btn-sm">OK</button></form></div>
-    <div class="table-wrap"><table><thead><tr><th>N┬░</th><th>Date</th><th>Type</th><th>Client</th><th>Réservation</th><th>Montant</th><th>TVA</th><th>Statut</th><th></th></tr></thead><tbody>
+      <form id="fq" class="row" style="flex-wrap:nowrap;margin-left:auto"><input name="q" value="${esc(p.q || '')}" placeholder="N░, client, réservation" aria-label="Chercher une facture"><button class="btn btn-ghost btn-sm">OK</button></form></div>
+    <div class="table-wrap"><table><thead><tr><th>N░</th><th>Date</th><th>Type</th><th>Client</th><th>Réservation</th><th>Montant</th><th>TVA</th><th>Statut</th><th></th></tr></thead><tbody>
     ${r.results.map((i) => `<tr><td><strong>${esc(i.number)}</strong></td><td>${fmtDate(i.issued_at)}</td><td>${INVK[i.kind]}</td><td>${esc(i.customer_name || '')}</td><td>${i.booking_ref ? refTag(i.booking_ref) : '—'}</td>
       <td class="tnum ${i.total < 0 ? '' : 'money-in'}">${i.total < 0 ? '− ' : ''}${fcfa(Math.abs(i.total))}</td><td class="tnum">${i.vat_amount ? fcfa(Math.abs(i.vat_amount)) : '—'}</td><td>${i.kind === 'CREDIT_NOTE' ? '<span class="badge b-sky">Avoir</span>' : badge(INVS, i.status)}</td>
       <td style="white-space:nowrap"><a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${printUrl('facture', { id: i.id }, 'admin')}">Imprimer</a>${i.kind === 'MANUAL' ? `<select data-st="${i.id}" aria-label="Statut" style="width:auto;display:inline-block;padding:6px 8px;margin-left:4px">${Object.entries(INVS).map(([k, v]) => `<option value="${k}" ${k === i.status ? 'selected' : ''}>${v[0]}</option>`).join('')}</select>` : ''}</td></tr>`).join('') || '<tr><td colspan="9" class="muted">Aucune facture.</td></tr>'}</tbody></table></div>`);
@@ -646,7 +646,7 @@ async function invoices(ctx) {
   root.querySelector('#ni').onclick = () => manualInvoice(ctx);
 }
 function manualInvoice(ctx) {
-  const lineRow = (l = {}) => `<tr><td><input name="label" value="${esc(l.label || '')}" placeholder="Ex. Transport groupé Dakar ➔ Touba (Magal)" aria-label="Désignation"></td><td style="width:80px"><input name="qty" type="number" min="0" step="0.5" value="${l.qty ?? 1}" aria-label="Quantité"></td><td style="width:130px"><input name="unit" type="number" min="0" value="${l.unit ?? ''}" aria-label="Prix unitaire"></td><td class="tnum lt" style="width:110px"></td><td><button type="button" class="btn btn-ghost btn-sm" data-rm aria-label="Supprimer la ligne">Ô£ò</button></td></tr>`;
+  const lineRow = (l = {}) => `<tr><td><input name="label" value="${esc(l.label || '')}" placeholder="Ex. Transport groupé Dakar ➔ Touba (Magal)" aria-label="Désignation"></td><td style="width:80px"><input name="qty" type="number" min="0" step="0.5" value="${l.qty ?? 1}" aria-label="Quantité"></td><td style="width:130px"><input name="unit" type="number" min="0" value="${l.unit ?? ''}" aria-label="Prix unitaire"></td><td class="tnum lt" style="width:110px"></td><td><button type="button" class="btn btn-ghost btn-sm" data-rm aria-label="Supprimer la ligne">£ò</button></td></tr>`;
   sheet(`<form novalidate>${errBox}<h3>Nouvelle facture manuelle</h3>
     <div class="grid grid-2"><div class="field"><label for="m1">Nom du client</label><input id="m1" name="c_name" required></div><div class="field"><label for="m2">Entreprise (facultatif)</label><input id="m2" name="c_company"></div>
       <div class="field"><label for="m3">Téléphone</label><input id="m3" name="c_phone" type="tel"></div><div class="field"><label for="m4">E-mail</label><input id="m4" name="c_email" type="email"></div>
@@ -678,18 +678,18 @@ async function company(ctx) {
   const c = { ...st.settings.company }, ro = isSuper() ? '' : 'disabled';
   const sample = { number: `FAC-${new Date().getFullYear()}-00042`, kind: 'INVOICE', status: 'PAID', issued_at: new Date().toISOString(), total: 12500, vat_amount: 0, vat_rate: 0, notes: '',
     customer: { name: 'Awa Diallo', phone: '+221 77 123 45 67', email: 'awa@exemple.sn' }, booking: { ref: 'RES-2026-00031', provider: 'WAVE', provider_ref: 'SIM-8F2A91' },
-    lines: [{ label: 'Transport de passager Dakar ➔ Saint-Louis · 2 place(s) · départ le 12 oct. 2026 à 07:30', qty: 2, unit: 5000, total: 10000 }, { label: 'Envoi ┬½ Passeport ┬╗ Dakar ➔ Saint-Louis · réf. COL-2026-00018', qty: 1, unit: 2500, total: 2500 }] };
+    lines: [{ label: 'Transport de passager Dakar ➔ Saint-Louis · 2 place(s) · départ le 12 oct. 2026 à 07:30', qty: 2, unit: 5000, total: 10000 }, { label: 'Envoi ½ Passeport ╗ Dakar ➔ Saint-Louis · réf. COL-2026-00018', qty: 1, unit: 2500, total: 2500 }] };
   const f = (n, l, v, ph = '', type = 'text') => `<div class="field"><label for="co-${n}">${l}</label><input id="co-${n}" name="${n}" type="${type}" value="${esc(v ?? '')}" placeholder="${esc(ph)}" ${ro}></div>`;
   const root = ctx.set(`<h2>Entreprise et facture</h2><p class="muted small">Ces informations apparaissent sur les factures, avoirs, étiquettes, relevés chauffeurs, et dans les boutons WhatsApp / e-mail des espaces. ${isSuper() ? 'L\'aperçu se met à jour en direct.' : 'Lecture seule : seul le propriétaire modifie ces réglages.'}</p>
     <div class="designer">
       <form class="card" id="cf" novalidate>${errBox}
         <h3>Identité</h3>
         ${f('name', 'Nom commercial', c.name)}${f('legalName', 'Raison sociale', c.legalName, 'Bokk Yoon SARL')}
-        <div class="grid grid-2">${f('ninea', 'NINEA', c.ninea)}${f('rccm', 'RCCM', c.rccm, 'SN-DKR-2026-B-ÔÇª')}</div>
+        <div class="grid grid-2">${f('ninea', 'NINEA', c.ninea)}${f('rccm', 'RCCM', c.rccm, 'SN-DKR-2026-B-…')}</div>
         ${f('address', 'Adresse', c.address, 'Sacré-C┼ôur 3, Dakar')}
         <h3 style="margin-top:8px">Contact (WhatsApp, e-mail)</h3>
-        <div class="grid grid-2">${f('whatsapp', 'Numéro WhatsApp', c.whatsapp, '+221 77 ÔÇª', 'tel')}${f('phone', 'Téléphone', c.phone, '', 'tel')}</div>
-        <div class="grid grid-2">${f('email', 'E-mail', c.email, 'contact@ÔÇª', 'email')}${f('website', 'Site web', c.website)}</div>
+        <div class="grid grid-2">${f('whatsapp', 'Numéro WhatsApp', c.whatsapp, '+221 77 …', 'tel')}${f('phone', 'Téléphone', c.phone, '', 'tel')}</div>
+        <div class="grid grid-2">${f('email', 'E-mail', c.email, 'contact@…', 'email')}${f('website', 'Site web', c.website)}</div>
         ${f('hours', 'Horaires du service client', c.hours, 'Tous les jours, 7 h – 22 h')}
         <h3 style="margin-top:8px">Mise en page</h3>
         <div class="field"><label>Modèle</label><div class="pill-nav" id="tpl">${['moderne', 'classique', 'minimal'].map((t) => `<button type="button" class="btn btn-ghost btn-sm ${t === c.template ? 'on' : ''}" data-t="${t}" ${ro}>${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div></div>
@@ -698,7 +698,7 @@ async function company(ctx) {
         <h3 style="margin-top:8px">Mentions</h3>
         <label class="check small"><input type="checkbox" name="vatEnabled" ${c.vatEnabled ? 'checked' : ''} ${ro}> Appliquer la TVA (prix TTC, TVA incluse)</label>
         <div class="field" style="margin-top:8px"><label for="co-vat">Taux de TVA (%)</label><input id="co-vat" name="vatRate" type="number" min="0" max="30" value="${c.vatRate ?? 18}" ${ro}></div>
-        <div class="field"><label for="co-pay">Modalités de paiement</label><input id="co-pay" name="payInfo" value="${esc(c.payInfo || '')}" placeholder="Wave, Orange Money, virementÔÇª" ${ro}></div>
+        <div class="field"><label for="co-pay">Modalités de paiement</label><input id="co-pay" name="payInfo" value="${esc(c.payInfo || '')}" placeholder="Wave, Orange Money, virement…" ${ro}></div>
         <div class="field"><label for="co-foot">Pied de page</label><textarea id="co-foot" name="footer" rows="2" ${ro}>${esc(c.footer || '')}</textarea></div>
         ${isSuper() ? '<button class="btn btn-primary btn-block" type="submit">Enregistrer</button>' : ''}
       </form>
@@ -763,7 +763,7 @@ async function calculator(ctx) {
     <div class="grid grid-2">
       <div class="card"><h3>Rentabilité d'un trajet</h3>
         <div class="grid grid-2"><div class="field"><label for="k1">De</label><select id="k1">${cityOptions('Dakar')}</select></div><div class="field"><label for="k2">À</label><select id="k2">${cityOptions('Touba')}</select></div>
-          <div class="field"><label for="k3">Passagers</label><input id="k3" type="number" min="0" max="8" value="3"></div><div class="field"><label for="k4">Colis (Ôëñ 5 kg)</label><input id="k4" type="number" min="0" max="30" value="2"></div></div>
+          <div class="field"><label for="k3">Passagers</label><input id="k3" type="number" min="0" max="8" value="3"></div><div class="field"><label for="k4">Colis (ëñ 5 kg)</label><input id="k4" type="number" min="0" max="30" value="2"></div></div>
         <div id="trip"></div></div>
       <div class="card"><h3>Marge sur un prix</h3>
         <div class="grid grid-2"><div class="field"><label for="m1">Prix payé par le client</label><input id="m1" type="number" min="0" value="5000"></div><div class="field"><label for="m2">Part chauffeur (%)</label><input id="m2" type="number" min="0" max="100" value="${P.driverSharePct}"></div>
@@ -774,7 +774,7 @@ async function calculator(ctx) {
       <div class="card"><h3>Calcul rapide</h3>
         <div class="kscreen"><div class="expr" id="ke"></div><div class="val tnum" id="kv">0</div></div>
         <div class="kpad" id="kp">${['C', '⌫', '%', '÷', '7', '8', '9', '×', '4', '5', '6', '−', '1', '2', '3', '+', '00', '0', ',', '='].map((k) => `<button type="button" class="${'÷×−+%'.includes(k) ? 'op' : k === '=' ? 'eq' : ''}" data-k="${k}">${k}</button>`).join('')}</div>
-        <p class="xs muted" style="margin:8px 0 0">Clavier accepté. ┬½ 5000 + 10 % ┬╗ ajoute 10 % de 5000.</p></div>
+        <p class="xs muted" style="margin:8px 0 0">Clavier accepté. ½ 5000 + 10 % ╗ ajoute 10 % de 5000.</p></div>
     </div>`);
   const $ = (id) => root.querySelector(id), num = (id) => Number($(id).value) || 0;
   const tripCalc = async () => {
@@ -798,7 +798,7 @@ async function calculator(ctx) {
   ['#v1', '#v2', '#v3'].forEach((i) => $(i).addEventListener('input', vatCalc));
   tripCalc(); marginCalc(); vatCalc();
   let expr = '';
-  const show = () => { $('#ke').textContent = expr; const r = evalExpr(expr); $('#kv').textContent = expr ? (Number.isNaN(r) ? 'ÔÇª' : r.toLocaleString('fr-FR', { maximumFractionDigits: 4 })) : '0'; };
+  const show = () => { $('#ke').textContent = expr; const r = evalExpr(expr); $('#kv').textContent = expr ? (Number.isNaN(r) ? '…' : r.toLocaleString('fr-FR', { maximumFractionDigits: 4 })) : '0'; };
   const press = (k) => {
     if (k === 'C') expr = ''; else if (k === '⌫') expr = expr.slice(0, -1);
     else if (k === '=') { const r = evalExpr(expr); if (!Number.isNaN(r)) expr = String(r).replace('.', ','); }
