@@ -3,7 +3,7 @@ import {
   fmtDur, api, token, esc, fmtDay, fmtTime, fmtDT, fmtDate, ago, today, addDays, initials, catLabel, qs, stars, fcfa, cityOptions,
   toast, sheet, errBox, submitting, on, act, BOOKING, TRIP, PAYOUT, PROVIDERS, badge, routeHtml, confirmSheet,
   createRouter, loginScreen, mountBell, renderNews, articlePage, renderAlerts, bootSpace, toggleTheme, accountBlocked,
-  helpPage, ticketPage, printUrl, refTag, getCompany, waLink, ICONS,
+  helpPage, ticketPage, printUrl, refTag, getCompany, waLink, ICONS, deleteAccountSheet,
 } from './ui.js';
 import { CATEGORIES } from './core.js';
 import { createMap } from './map.js';
@@ -312,7 +312,9 @@ async function profile(ctx) {
       <button class="btn btn-ghost btn-sm" id="addv">Ajouter un véhicule</button><div id="vbox"></div></div>
     <div class="card" style="margin-top:16px"><h3>Paiement de vos gains</h3><p class="small" style="margin:0">${esc(PROVIDERS[u.driver.payout_provider])} · ${esc(u.driver.payout_phone)}</p><p class="xs muted" style="margin:6px 0 0">Pour changer de numéro, contactez l'équipe (vérification anti-fraude).</p></div>
     <a class="btn btn-ghost btn-block" href="../app/#/membre/${u.id}" style="margin-top:16px">Voir mon profil public</a>` : ''}
-    <div class="card" style="margin-top:16px"><h3>Application</h3><div class="row"><a class="btn btn-ghost btn-sm" href="#/aide">Aide et contact</a><button class="btn btn-ghost btn-sm" id="theme">Thème clair / sombre</button><button class="btn btn-danger btn-sm" id="logout">Se déconnecter</button></div></div>`);
+    <div class="card" style="margin-top:16px"><h3>Application</h3><div class="row"><a class="btn btn-ghost btn-sm" href="#/aide">Aide et contact</a><button class="btn btn-ghost btn-sm" id="theme">Thème clair / sombre</button><button class="btn btn-danger btn-sm" id="logout">Se déconnecter</button></div>
+      <p class="xs muted" style="margin:14px 0 0"><button class="linklike" id="delacc" type="button">Supprimer mon compte chauffeur</button></p></div>`);
+  root.querySelector('#delacc').onclick = () => deleteAccountSheet(() => { stopSharing(); me = null; bell.refresh(); go('#/'); });
   root.querySelector('#pf')?.addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => { await api('PATCH', '/me', d); toast('Enregistré'); }); });
   root.querySelector('#addv')?.addEventListener('click', () => {
     const box = root.querySelector('#vbox');

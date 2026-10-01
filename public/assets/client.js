@@ -3,7 +3,7 @@ import {
   fmtDur, api, token, resetDemo, esc, fmtDay, fmtTime, fmtDT, fmtDate, ago, today, addDays, initials, catLabel, qs, stars, fcfa, cityOptions,
   toast, sheet, formData, errBox, submitting, on, act, BOOKING, PACKAGE, TRIP, PROVIDERS, badge, routeHtml, personHtml, confirmSheet,
   createRouter, loginScreen, mountBell, renderNews, articlePage, renderAlerts, locateMe, bootSpace, toggleTheme, newsCat,
-  helpPage, ticketPage, contactButtons, printUrl, refTag, getCompany, waLink, ICONS, qrSrc,
+  helpPage, ticketPage, contactButtons, printUrl, refTag, getCompany, waLink, ICONS, qrSrc, deleteAccountSheet,
 } from './ui.js';
 import { CATEGORIES, FORBIDDEN, LIMITS, cityByName } from './core.js';
 import { createMap } from './map.js';
@@ -502,7 +502,9 @@ async function profile(ctx) {
     <div class="card" style="margin-top:16px" id="partner"></div>
     <div class="card" style="margin-top:16px"><h3>Application</h3>
       <div class="row"><button class="btn btn-ghost btn-sm" id="theme">Thème clair / sombre</button><a class="btn btn-ghost btn-sm" href="#/actualites">Actualités</a><a class="btn btn-ghost btn-sm" href="#/activite?tab=factures">Mes factures</a><a class="btn btn-ghost btn-sm" href="#/aide">Aide et contact</a><a class="btn btn-ghost btn-sm" href="#/calculer">Calculatrice</a>
-      <button class="btn btn-danger btn-sm" id="logout">Se déconnecter</button><button class="btn btn-ghost btn-sm" id="reset" hidden>Réinitialiser la démo</button></div></div>`);
+      <button class="btn btn-danger btn-sm" id="logout">Se déconnecter</button><button class="btn btn-ghost btn-sm" id="reset" hidden>Réinitialiser la démo</button></div>
+      <p class="xs muted" style="margin:14px 0 0"><button class="linklike" id="delacc" type="button">Supprimer mon compte</button></p></div>`);
+  root.querySelector('#delacc').onclick = () => deleteAccountSheet(() => { me = null; bell.refresh(); go('#/'); });
   root.querySelector('#pf').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => { await api('PATCH', '/me', d); await loadMe(true); toast('Profil enregistré'); }); });
   root.querySelector('#theme').onclick = toggleTheme;
   root.querySelector('#logout').onclick = async () => { try { await api('POST', '/auth/logout'); } catch { /* déjà déconnecté */ } token.clear(); me = null; bell.refresh(); go('#/'); };

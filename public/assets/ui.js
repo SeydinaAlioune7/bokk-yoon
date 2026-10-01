@@ -127,7 +127,7 @@ export function loginScreen(set, space, { demoHint = '', onDone }) {
       <button class="btn btn-primary btn-block" type="submit">Recevoir le code</button>
       <p class="hint" id="demo-hint" hidden style="margin-top:12px">${demoHint}</p>
     </form><div id="step2"></div></div>`);
-  api('GET', '/config').then((c) => { if (c.demoOtp && demoHint) root.querySelector('#demo-hint').hidden = false; }).catch(() => {});
+  api('GET', '/config').then((c) => { if (c.mode === 'demo' && demoHint) root.querySelector('#demo-hint').hidden = false; }).catch(() => {});
   root.querySelector('#f1').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => {
     const r = await api('POST', '/auth/otp/request', { phone: d.phone, space });
     const s2 = root.querySelector('#step2');
@@ -278,4 +278,22 @@ export async function ticketPage(ctx, id) {
       ${t.status !== 'CLOSED' ? `<form id="rf" class="row" style="margin-top:12px;flex-wrap:nowrap"><input name="body" placeholder="Répondre…" aria-label="Réponse" autocomplete="off"><button class="btn btn-primary btn-sm" type="submit">Envoyer</button></form>` : '<p class="small muted">Conversation close.</p>'}</div>
     ${c.whatsapp ? `<a class="btn btn-ghost btn-block" style="margin-top:12px" target="_blank" rel="noopener" href="${waLink(c.whatsapp, `Bonjour, au sujet de mon message ${t.ref} : `)}">Continuer sur WhatsApp</a>` : ''}`);
   root.querySelector('#rf')?.addEventListener('submit', async (e) => { e.preventDefault(); const i = e.target.body; if (!i.value.trim()) return; try { await api('POST', `/me/tickets/${id}/messages`, { body: i.value }); ctx.render(); } catch (er) { toast(er.message); } });
+}
+
+/** Suppression du compte par le membre lui-même (client ou chauffeur). */
+export async function deleteAccountSheet(onDone) {
+  let bl = [];
+  try { bl = (await api('GET', '/me/delete')).blockers; } catch { /* hors ligne */ }
+  sheet(`<form novalidate>${errBox}<h3>Supprimer mon compte</h3>
+    ${bl.length ? `<div class="error small">Suppression impossible pour le moment :<ul style="margin:6px 0 0;padding-left:18px">${bl.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <p class="small muted" style="margin-top:10px">Terminez ou annulez ces opérations, ou écrivez-nous depuis « Aide et contact ».</p>
+      <button class="btn btn-ghost btn-block" type="button" data-close>Fermer</button>` : `
+    <p class="small">Votre nom, votre numéro et vos informations personnelles seront effacés et vous serez déconnecté. Votre numéro pourra ensuite servir à créer un nouveau compte.</p>
+    <p class="small muted">Les factures et l'historique des paiements sont conservés de façon anonyme, comme l'exige la comptabilité. Cette action est définitive.</p>
+    <div class="field"><label for="dr">Pourquoi partez-vous ? (facultatif)</label><input id="dr" name="reason" maxlength="300"></div>
+    <div class="field"><label for="dc">Tapez <strong>SUPPRIMER</strong> pour confirmer</label><input id="dc" name="confirm" autocomplete="off" required></div>
+    <div class="row"><button class="btn btn-danger" type="submit">Supprimer définitivement</button><button class="btn btn-ghost" type="button" data-close>Annuler</button></div>`}</form>`,
+  (s, close) => s.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => {
+    await api('POST', '/me/delete', d); token.clear(); close(); toast('Votre compte a été supprimé'); onDone?.();
+  }); }));
 }

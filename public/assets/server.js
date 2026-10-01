@@ -236,6 +236,42 @@ async function currentUser(q, headers) {
   u.space = s.space;
   return u;
 }
+
+/** Suppression de compte (client ou chauffeur) : l'historique comptable (réservations, factures, versements) est conservé
+ *  mais anonymisé ; le numéro est libéré. Refusée tant qu'il reste une réservation, une mission, un versement ou un litige en cours. */
+async function accountBlockers(q, u) {
+  const out = [];
+  const act = await q.first(`SELECT COUNT(*) n FROM bookings WHERE (customer_id = ? OR driver_id = ?) AND (status IN ('PAID','IN_PROGRESS','DISPUTED')
+    OR (status = 'PENDING_PAYMENT' AND EXISTS (SELECT 1 FROM payment_claims c WHERE c.booking_id = bookings.id AND c.status = 'PENDING')))`, u.id, u.id);
+  if (act.n) out.push(`${act.n} réservation(s) ou mission(s) en cours (payée, en route ou en réclamation)`);
+  if (u.role === 'driver') {
+    const due = await q.first("SELECT COUNT(*) n, COALESCE(SUM(driver_pay),0) s FROM bookings WHERE driver_id = ? AND payout_status IN ('DUE','HELD')", u.id);
+    if (due.n) out.push(`${due.s.toLocaleString('fr-FR')} FCFA de gains pas encore versés (attendez le versement)`);
+    const live = await q.first("SELECT COUNT(*) n FROM trips WHERE driver_id = ? AND status = 'IN_PROGRESS'", u.id);
+    if (live.n) out.push('un trajet en cours');
+  }
+  const refund = await q.first("SELECT COUNT(*) n FROM payment_claims WHERE customer_id = ? AND status = 'REFUND'", u.id);
+  if (refund.n) out.push('un remboursement en attente');
+  return out;
+}
+async function deleteAccount(q, env, u, actorId, reason) {
+  const now = nowIso();
+  for (const b of await q.all("SELECT * FROM bookings WHERE customer_id = ? AND status = 'PENDING_PAYMENT'", u.id)) await cancelBooking(q, env, b, 'client', 'compte supprimé', actorId);
+  if (u.role === 'driver') {
+    for (const t of await q.all("SELECT id FROM trips WHERE driver_id = ? AND status IN ('PUBLISHED','FULL','SUSPENDED')", u.id)) {
+      for (const b of await q.all("SELECT * FROM bookings WHERE trip_id = ? AND status = 'PENDING_PAYMENT'", t.id)) await cancelBooking(q, env, b, 'driver', 'chauffeur parti', actorId);
+      await q.run("UPDATE trips SET status = 'CANCELLED' WHERE id = ?", t.id);
+    }
+    await q.run("UPDATE driver_profiles SET payout_phone = '', id_doc_last4 = '****', license_last4 = '****' WHERE user_id = ?", u.id);
+  }
+  await q.run("UPDATE packages SET status = 'CANCELLED' WHERE sender_id = ? AND status = 'CREATED'", u.id);
+  await q.run("UPDATE users SET phone = ?, name = 'Compte supprimé', email = '', bio = '', city = '', status = 'blocked', status_reason = ? WHERE id = ?", 'supprime:' + u.id, 'Compte supprimé · ' + reason, u.id);
+  await q.run('DELETE FROM sessions WHERE user_id = ?', u.id);
+  await q.run('DELETE FROM otps WHERE phone = ?', u.phone);
+  await q.run('DELETE FROM notifications WHERE user_id = ?', u.id);
+  await q.run("UPDATE partners SET api_key_hash = ?, webhook_url = '' WHERE owner_id = ?", 'revoque:' + uid(), u.id);
+  await audit(q, actorId, 'user.deleted', 'user', u.id, { ref: u.ref, role: u.role, reason, by: actorId === u.id ? 'lui-même' : 'équipe' });
+}
 function statusMessage(u) {
   if (u.status === 'blocked') return 'Ce compte est bloqué. Contactez le support Bokk Yoon.';
   if (u.status === 'suspended') return `Ce compte est suspendu${u.suspended_until ? ' jusqu\'au ' + new Date(u.suspended_until).toLocaleDateString('fr-FR') : ''}. Motif : ${u.status_reason || 'non précisé'}.`;
@@ -644,7 +680,9 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     const admins = String(env.ADMIN_PHONES || '').split(',').map((s) => s.trim()).filter(Boolean);
     if (existing) {
       const msg = statusMessage(existing); if (msg) fail(403, 'ACCOUNT_' + existing.status.toUpperCase(), msg);
-      if (!SPACE_ROLES[space].includes(existing.role)) fail(403, 'WRONG_SPACE', `Ce numéro est rattaché à ${SPACE_LABEL[roleSpace(existing.role)]}. Chaque espace est séparé : utilisez ${SPACE_LABEL[roleSpace(existing.role)]}${existing.role === 'client' ? ' ou un autre numéro pour devenir chauffeur' : ''}.`);
+      // Numéro déclaré propriétaire (ADMIN_PHONES) : il peut toujours entrer dans l'espace équipe, même s'il a d'abord servi à un compte client.
+      const ownerTakeover = space === 'admin' && admins.includes(phone) && existing.role === 'client';
+      if (!ownerTakeover && !SPACE_ROLES[space].includes(existing.role)) fail(403, 'WRONG_SPACE', `Ce numéro est rattaché à ${SPACE_LABEL[roleSpace(existing.role)]}. Chaque espace est séparé : utilisez ${SPACE_LABEL[roleSpace(existing.role)]}${existing.role === 'client' ? ' ou un autre numéro pour devenir chauffeur' : ''}.`);
     } else if (space === 'admin' && !admins.includes(phone)) fail(403, 'TEAM_ONLY', 'Accès réservé à l\'équipe Bokk Yoon.');
     if (seg[2] === 'request') {
       const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
@@ -663,6 +701,13 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     if ((await sha256(phone + ':' + str(body.code, 6))) !== row.code_hash) { await q.run('UPDATE otps SET attempts = attempts + 1 WHERE phone = ?', phone); fail(400, 'OTP_WRONG', 'Code incorrect.'); }
     await q.run('DELETE FROM otps WHERE phone = ?', phone);
     let u = existing;
+    if (u && space === 'admin' && admins.includes(phone) && u.role === 'client') {
+      await q.run("UPDATE users SET role = 'superadmin', ref = NULL WHERE id = ?", u.id);
+      await setRef(q, 'users', u.id, 'superadmin');
+      await q.run("DELETE FROM sessions WHERE user_id = ? AND space != 'admin'", u.id);
+      await audit(q, u.id, 'user.promoted_owner', 'user', u.id, { from: 'client' });
+      u = await q.first('SELECT * FROM users WHERE id = ?', u.id);
+    }
     if (!u) {
       const id = uid(), role = space === 'admin' ? 'superadmin' : space;
       await q.run('INSERT INTO users (id, phone, name, role, created_at) VALUES (?,?,?,?,?)', id, phone, str(body.name, 60), role, nowIso());
@@ -691,6 +736,19 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       out.vehicles = await q.all('SELECT * FROM vehicles WHERE owner_id = ? ORDER BY created_at', me.id);
     }
     return ok(out);
+  }
+  if (is('GET', 'me', 'delete')) {
+    if (!me) fail(401, 'AUTH_REQUIRED', 'Connectez-vous pour continuer.');
+    return ok({ blockers: ['client', 'driver'].includes(me.role) ? await accountBlockers(q, me) : ['Le compte de l\'équipe se supprime depuis l\'espace équipe.'] });
+  }
+  if (is('POST', 'me', 'delete')) {
+    if (!me) fail(401, 'AUTH_REQUIRED', 'Connectez-vous pour continuer.');
+    if (!['client', 'driver'].includes(me.role)) fail(403, 'FORBIDDEN', 'Un compte de l\'équipe ne peut pas être supprimé ici.');
+    if (str(body.confirm, 20).toUpperCase() !== 'SUPPRIMER') fail(400, 'CONFIRM_REQUIRED', 'Tapez SUPPRIMER pour confirmer.');
+    const bl = await accountBlockers(q, me); if (bl.length) fail(409, 'ACCOUNT_BUSY', 'Suppression impossible pour le moment : ' + bl.join(' ; ') + '.');
+    await deleteAccount(q, env, me, me.id, str(body.reason, 300) || 'à la demande du membre');
+    await notifyTeam(q, `Compte supprimé ${me.ref}`, `${me.name} a supprimé son compte ${me.role === 'driver' ? 'chauffeur' : 'client'}.`, '#/journal');
+    return ok({ deleted: true });
   }
   if (is('PATCH', 'me')) {
     if (!me) fail(401, 'AUTH_REQUIRED', 'Connectez-vous pour continuer.');
@@ -1260,6 +1318,17 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
       notes: await q.all('SELECT n.*, a.name author_name FROM admin_notes n JOIN users a ON a.id = n.author_id WHERE n.user_id = ? ORDER BY n.created_at DESC', u.id),
       reviews: await q.all('SELECT r.id, r.rating, r.comment, r.hidden, r.created_at, a.name author FROM reviews r JOIN users a ON a.id = r.author_id WHERE r.target_id = ? ORDER BY r.created_at DESC LIMIT 30', u.id),
     });
+  }
+  if (method === 'POST' && r1 === 'users' && r2 && r3 === 'delete') {
+    if (!isSuper) fail(403, 'SUPER_ONLY', 'La suppression d\'un compte est réservée au propriétaire.');
+    const target = await q.first('SELECT * FROM users WHERE id = ?', r2); if (!target) fail(404, 'NOT_FOUND', 'Membre introuvable.');
+    if (!['client', 'driver'].includes(target.role)) fail(403, 'FORBIDDEN', 'Pour un membre de l\'équipe, utilisez « Retirer l\'accès ».');
+    if (String(target.phone).startsWith('supprime:')) fail(409, 'ALREADY', 'Ce compte est déjà supprimé.');
+    if (target.status === 'blocked' && !body.force) fail(409, 'BLOCKED', 'Ce compte est bloqué : le supprimer libérerait son numéro et lui permettrait de revenir. Laissez-le bloqué.');
+    const reason = str(body.reason, 300); if (!reason) fail(400, 'REASON_REQUIRED', 'Un motif est obligatoire.');
+    const bl = await accountBlockers(q, target); if (bl.length) fail(409, 'ACCOUNT_BUSY', 'Suppression impossible pour le moment : ' + bl.join(' ; ') + '.');
+    await deleteAccount(q, env, target, a.id, reason);
+    return ok({ deleted: true });
   }
   if (method === 'POST' && r1 === 'users' && r2 && ['warn', 'suspend', 'block', 'reactivate', 'note'].includes(r3)) {
     const target = await q.first('SELECT * FROM users WHERE id = ?', r2); if (!target) fail(404, 'NOT_FOUND', 'Membre introuvable.');

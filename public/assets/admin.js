@@ -178,6 +178,7 @@ async function member(ctx, id) {
       ${x.status === 'active' ? '<button class="btn btn-ghost btn-sm" data-a="suspend">Suspendre</button>' : '<button class="btn btn-primary btn-sm" data-a="reactivate">Réactiver</button>'}
       ${x.status !== 'blocked' && isSuper() ? '<button class="btn btn-danger btn-sm" data-a="block">Bloquer définitivement</button>' : ''}
       <button class="btn btn-ghost btn-sm" data-a="note">Ajouter une note</button>
+      ${isSuper() && ['client', 'driver'].includes(x.role) && x.status !== 'blocked' ? '<button class="btn btn-ghost btn-sm" data-a="delete" style="color:var(--terra)">Supprimer le compte</button>' : ''}
       <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${waLink(x.phone, `Bonjour ${(x.name || '').split(' ')[0]}, ici l'équipe Bokk Yoon. `)}">WhatsApp</a>${x.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(x.email)}">E-mail</a>` : ''}</div>` : ''}
     <div class="grid grid-4" style="margin-top:16px">
       ${kpi('Note', d.stats.ratingCount ? '★ ' + String(d.stats.ratingAvg).replace('.', ',') : '—', d.stats.ratingCount + ' avis')}
@@ -206,6 +207,7 @@ async function member(ctx, id) {
     if (a === 'suspend') reasonSheet(`Suspendre ${x.name}`, (f) => api('POST', `/admin/users/${id}/suspend`, { ...f, days: Number(f.days) }), { extra: days + consequences, cta: 'Suspendre' });
     if (a === 'block') reasonSheet(`Bloquer ${x.name} définitivement`, (f) => api('POST', `/admin/users/${id}/block`, f), { extra: consequences, cta: 'Bloquer' });
     if (a === 'reactivate') reasonSheet(`Réactiver ${x.name}`, (f) => api('POST', `/admin/users/${id}/reactivate`, f), { cta: 'Réactiver' });
+    if (a === 'delete') reasonSheet(`Supprimer le compte de ${x.name}`, (f) => api('POST', `/admin/users/${id}/delete`, f), { extra: '<p class="small muted">À utiliser à la demande du membre. Ses données personnelles sont effacées et son numéro est libéré ; factures et historique sont conservés de façon anonyme. Pour écarter un fraudeur, utilisez plutôt « Bloquer » : son numéro reste interdit.</p>', label: 'Motif (ex. demande du client par WhatsApp)', cta: 'Supprimer définitivement' });
     if (a === 'note') reasonSheet('Note interne', (f) => api('POST', `/admin/users/${id}/note`, { body: f.reason }), { label: 'Note (visible par l\'équipe uniquement)', cta: 'Ajouter' });
   });
   root.querySelector('#appr')?.addEventListener('click', async () => { if (await act(() => api('POST', `/admin/drivers/${id}/review`, { decision: 'APPROVED' }), 'Dossier validé')) ctx.render(); });
