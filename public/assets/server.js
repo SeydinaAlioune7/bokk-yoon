@@ -137,8 +137,25 @@ function toCsv(rows) {
 }
 
 async function sendSms(env, phone, text) {
-  // Brancher ici le fournisseur SMS (API Orange SMS, etc.) via env.SMS_WEBHOOK_URL.
-  if (env.SMS_WEBHOOK_URL) {
+  // Africa's Talking SMS API
+  if (env.AT_API_KEY) {
+    try {
+      const username = env.AT_USERNAME || 'sandbox';
+      const params = new URLSearchParams({ username, to: phone, message: text });
+      const resp = await fetch('https://api.africastalking.com/version1/messaging', {
+        method: 'POST',
+        headers: {
+          'apiKey': env.AT_API_KEY,
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      });
+      const result = await resp.json();
+      if (!resp.ok) console.error('AT SMS error:', JSON.stringify(result));
+      return result;
+    } catch (e) { console.error('AT SMS exception:', e.message); }
+  } else if (env.SMS_WEBHOOK_URL) {
     try { await fetch(env.SMS_WEBHOOK_URL, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${env.SMS_TOKEN || ''}` }, body: JSON.stringify({ to: phone, text }) }); } catch { /* journaliser en production */ }
   }
 }
