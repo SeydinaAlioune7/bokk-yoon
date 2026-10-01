@@ -694,7 +694,8 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       await q.run('DELETE FROM otps WHERE phone = ?', phone);
       await q.run('INSERT INTO otps (phone, code_hash, attempts, expires_at, sent_count, window_start) VALUES (?,?,0,?,?,?)', phone, await sha256(phone + ':' + code), new Date(Date.now() + 5 * 60000).toISOString(), sent, winStart);
       await sendSms(env, phone, `Bokk Yoon : votre code est ${code}. Il expire dans 5 minutes. Ne le partagez avec personne.`);
-      if (body.email) await sendEmail(env, str(body.email, 120).toLowerCase(), 'Code de validation Bokk Yoon', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
+      const emailDest = body.email ? str(body.email, 120).toLowerCase() : (existing?.email || null);
+      if (emailDest) await sendEmail(env, emailDest, 'Code de validation Bokk Yoon', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
       return ok({ sent: true, phone, isNew: !existing, demoCode: (env.DEMO_OTP !== 'false' && space !== 'admin') ? code : undefined });
     }
     if (space === 'admin' && env.ADMIN_PASSWORD && body.password !== env.ADMIN_PASSWORD) fail(403, 'WRONG_PASSWORD', 'Mot de passe équipe incorrect.');
