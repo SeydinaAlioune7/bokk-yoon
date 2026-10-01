@@ -612,11 +612,11 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
   }
   if (is('GET', 'news')) {
     const aud = ['CLIENTS', 'DRIVERS'].includes(query.audience) ? query.audience : null;
-    const rows = await q.all(`SELECT id, slug, title, summary, category, audience, published_at FROM news WHERE status = 'PUBLISHED' ${aud ? "AND audience IN ('ALL', ?)" : ''} ORDER BY published_at DESC LIMIT ?`, ...(aud ? [aud] : []), Math.min(50, int(query.limit) || 12));
+    const rows = await q.all(`SELECT id, slug, title, summary, category, audience, image_url, published_at FROM news WHERE status = 'PUBLISHED' ${aud ? "AND audience IN ('ALL', ?)" : ''} ORDER BY published_at DESC LIMIT ?`, ...(aud ? [aud] : []), Math.min(50, int(query.limit) || 12));
     return ok({ results: rows });
   }
   if (is('GET', 'news', '*')) {
-    const n = await q.first("SELECT id, slug, title, summary, body, category, audience, published_at FROM news WHERE slug = ? AND status = 'PUBLISHED'", r1);
+    const n = await q.first("SELECT id, slug, title, summary, body, category, audience, image_url, published_at FROM news WHERE slug = ? AND status = 'PUBLISHED'", r1);
     if (!n) fail(404, 'NOT_FOUND', 'Article introuvable.');
     return ok(n);
   }
