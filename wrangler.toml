@@ -13,10 +13,12 @@ not_found_handling = "404-page"
 DEMO_OTP = "true"
 # NumÃ©ro(s) du propriÃ©taire (super-admin), sÃ©parÃ©s par des virgules. Les membres de l'Ã©quipe s'ajoutent depuis /admin/.
 ADMIN_PHONES = "+221778561630"
+ADMIN_PASSWORD = "777777"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "bokk-yoon-db"
 database_id = "9af0ca17-fd0c-4ba2-9b0d-4c35d426a2b3"
+
 
 
