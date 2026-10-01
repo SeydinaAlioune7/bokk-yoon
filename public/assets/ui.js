@@ -124,12 +124,13 @@ export function loginScreen(set, space, { demoHint = '', onDone }) {
     <h2>${t.title}</h2><p class="muted">${t.lead}</p>
     <form id="f1" class="card" novalidate>${errBox}
       <div class="field"><label for="phone">Numéro de téléphone</label><input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="77 123 45 67" required></div>
+      <div class="field"><label for="email">Adresse e-mail</label><input id="email" name="email" type="email" autocomplete="email" placeholder="votre@email.com" required></div>
       <button class="btn btn-primary btn-block" type="submit">Recevoir le code</button>
       <p class="hint" id="demo-hint" hidden style="margin-top:12px">${demoHint}</p>
     </form><div id="step2"></div></div>`);
   api('GET', '/config').then((c) => { if (c.mode === 'demo' && demoHint) root.querySelector('#demo-hint').hidden = false; }).catch(() => {});
   root.querySelector('#f1').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => {
-    const r = await api('POST', '/auth/otp/request', { phone: d.phone, space });
+    const r = await api('POST', '/auth/otp/request', { phone: d.phone, email: d.email, space });
     const s2 = root.querySelector('#step2');
     s2.innerHTML = `<form id="f2" class="card" style="margin-top:12px" novalidate>${errBox}
       ${r.demoCode ? `<div class="notice small" style="margin-bottom:12px">Démo — votre code : <strong style="letter-spacing:.2em">${r.demoCode}</strong></div>` : ''}
@@ -142,7 +143,7 @@ export function loginScreen(set, space, { demoHint = '', onDone }) {
     f2.addEventListener('submit', (ev) => { ev.preventDefault(); submitting(f2, async (d2) => {
       if (r.isNew && space !== 'admin' && !d2.cgu) throw new Error('Veuillez accepter les conditions.');
       if (r.isNew && space !== 'driver' && (d2.name || '').split(/\s+/).length < 2) throw new Error('Indiquez votre prénom et votre nom.');
-      const v = await api('POST', '/auth/otp/verify', { phone: r.phone, code: d2.code, space, name: d2.name });
+      const v = await api('POST', '/auth/otp/verify', { phone: r.phone, email: d.email, code: d2.code, space, name: d2.name });
       token.set(v.token);
       toast('Connecté'); onDone(v);
     }); });

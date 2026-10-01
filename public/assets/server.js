@@ -694,6 +694,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       await q.run('DELETE FROM otps WHERE phone = ?', phone);
       await q.run('INSERT INTO otps (phone, code_hash, attempts, expires_at, sent_count, window_start) VALUES (?,?,0,?,?,?)', phone, await sha256(phone + ':' + code), new Date(Date.now() + 5 * 60000).toISOString(), sent, winStart);
       await sendSms(env, phone, `Bokk Yoon : votre code est ${code}. Il expire dans 5 minutes. Ne le partagez avec personne.`);
+      if (body.email) await sendEmail(env, str(body.email, 120).toLowerCase(), 'Code de validation Bokk Yoon', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
       return ok({ sent: true, phone, isNew: !existing, demoCode: (env.DEMO_OTP !== 'false' && space !== 'admin') ? code : undefined });
     }
     const isAdminPassword = space === 'admin' && env.ADMIN_PASSWORD && body.code === env.ADMIN_PASSWORD;
@@ -703,6 +704,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     if (!isAdminPassword && (await sha256(phone + ':' + str(body.code, 6))) !== row?.code_hash) { await q.run('UPDATE otps SET attempts = attempts + 1 WHERE phone = ?', phone); fail(400, 'OTP_WRONG', 'Code incorrect.'); }
     await q.run('DELETE FROM otps WHERE phone = ?', phone);
     let u = existing;
+    if (u && body.email && body.email !== u.email) { await q.run('UPDATE users SET email = ? WHERE id = ?', str(body.email, 120).toLowerCase(), u.id); }
     if (u && space === 'admin' && admins.includes(phone) && u.role === 'client') {
       await q.run("UPDATE users SET role = 'superadmin', ref = NULL WHERE id = ?", u.id);
       await setRef(q, 'users', u.id, 'superadmin');
@@ -712,7 +714,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     }
     if (!u) {
       const id = uid(), role = space === 'admin' ? 'superadmin' : space;
-      await q.run('INSERT INTO users (id, phone, name, role, created_at) VALUES (?,?,?,?,?)', id, phone, str(body.name, 60), role, nowIso());
+      await q.run('INSERT INTO users (id, phone, name, email, role, created_at) VALUES (?,?,?,?,?,?)', id, phone, str(body.name, 60), str(body.email || '', 120).toLowerCase(), role, nowIso());
       await setRef(q, 'users', id, role);
       u = await q.first('SELECT * FROM users WHERE id = ?', id);
       await audit(q, id, 'user.created', 'user', id, { role });
