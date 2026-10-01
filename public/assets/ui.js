@@ -133,7 +133,7 @@ export function loginScreen(set, space, { demoHint = '', onDone }) {
     const r = await api('POST', '/auth/otp/request', { phone: d.phone, email: d.email, space });
     const s2 = root.querySelector('#step2');
     s2.innerHTML = `<form id="f2" class="card" style="margin-top:12px" novalidate>${errBox}
-      ${r.demoCode ? `<div class="notice small" style="margin-bottom:12px">Démo — votre code : <strong style="letter-spacing:.2em">${r.demoCode}</strong></div>` : ''}
+      
       ${space === 'admin' ? '<div class="field"><label for="pwd">Mot de passe équipe</label><input id="pwd" name="password" type="password" required></div>' : ''}
       <div class="field"><label for="code">Code reçu au ${esc(r.phone)}</label><input id="code" name="code" class="otp-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></div>
       ${r.isNew && space !== 'driver' ? `<div class="field"><label for="nm">Prénom et nom</label><input id="nm" name="name" autocomplete="name" required maxlength="60" placeholder="Awa Diop"></div>

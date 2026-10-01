@@ -696,7 +696,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       await sendSms(env, phone, `Bokk Yoon : votre code est ${code}. Il expire dans 5 minutes. Ne le partagez avec personne.`);
       const emailDest = body.email ? str(body.email, 120).toLowerCase() : (existing?.email || null);
       if (emailDest) await sendEmail(env, emailDest, 'Code de validation Bokk Yoon', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
-      return ok({ sent: true, phone, isNew: !existing, demoCode: (env.DEMO_OTP !== 'false' && space !== 'admin') ? code : undefined });
+      return ok({ sent: true, phone, isNew: !existing });
     }
     if (space === 'admin' && env.ADMIN_PASSWORD && body.password !== env.ADMIN_PASSWORD) fail(403, 'WRONG_PASSWORD', 'Mot de passe équipe incorrect.');
     const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
