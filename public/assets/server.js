@@ -154,7 +154,7 @@ const getTariffs = (q) => q.all('SELECT * FROM tariffs ORDER BY origin, dest');
 async function quoteFor(q, A, B) { return quote(await getSettings(q), await getTariffs(q), A, B); }
 
 const payMode = (ps, env) => (ps.mode === 'AUTO' ? (env.MODE === 'cloud' ? 'QR' : 'SIMULATION') : ps.mode);
-const fmtAmount = (n) => Math.round(n).toLocaleString('fr-FR');
+const fmtAmount = (n) => Math.round(n).toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ');
 /** Encaissement confirmÃ© (simulation, QR vÃ©rifiÃ© par l'Ã©quipe, ou webhook du prestataire) : codes, facture, notifications. */
 async function capturePayment(q, env, b, t, provider, providerRef, actorId, { simulated = false, idempotencyKey = null, verifiedBy = null } = {}) {
   const now = nowIso(), pid = uid();
@@ -168,7 +168,7 @@ async function capturePayment(q, env, b, t, provider, providerRef, actorId, { si
     const p = await q.first('SELECT recipient_phone FROM packages WHERE id = ?', b.package_id);
     await sendSms(env, p.recipient_phone, `Bokk Yoon : un colis arrive pour vous. Suivi et code de rÃ©ception : ${env.APP_URL || ''}/app/#/suivi/${track}`);
   }
-  await notify(q, b.driver_id, b.kind === 'PARCEL' ? 'Nouveau colis confirmÃ©' : 'Nouvelle rÃ©servation confirmÃ©e', `${b.from_city} â†’ ${b.to_city} Â· ${fmtDay(t.departure_at)} Â· vous recevrez ${b.driver_pay.toLocaleString('fr-FR')} FCFA`, `#/mission/${b.id}`, 'success');
+  await notify(q, b.driver_id, b.kind === 'PARCEL' ? 'Nouveau colis confirmÃ©' : 'Nouvelle rÃ©servation confirmÃ©e', `${b.from_city} â†’ ${b.to_city} Â· ${fmtDay(t.departure_at)} Â· vous recevrez ${b.driver_pay.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA`, `#/mission/${b.id}`, 'success');
   await audit(q, actorId, 'payment.captured', 'booking', b.id, { provider, amount: b.price, simulated, verifiedBy });
   return pid;
 }
@@ -246,7 +246,7 @@ async function accountBlockers(q, u) {
   if (act.n) out.push(`${act.n} rÃ©servation(s) ou mission(s) en cours (payÃ©e, en route ou en rÃ©clamation)`);
   if (u.role === 'driver') {
     const due = await q.first("SELECT COUNT(*) n, COALESCE(SUM(driver_pay),0) s FROM bookings WHERE driver_id = ? AND payout_status IN ('DUE','HELD')", u.id);
-    if (due.n) out.push(`${due.s.toLocaleString('fr-FR')} FCFA de gains pas encore versÃ©s (attendez le versement)`);
+    if (due.n) out.push(`${due.s.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA de gains pas encore versÃ©s (attendez le versement)`);
     const live = await q.first("SELECT COUNT(*) n FROM trips WHERE driver_id = ? AND status = 'IN_PROGRESS'", u.id);
     if (live.n) out.push('un trajet en cours');
   }
@@ -356,7 +356,7 @@ async function cancelBooking(q, env, b, who, reason, actorId) {
   }
   await releaseCapacity(q, b);
   if (b.package_id) await q.run("UPDATE packages SET status = 'CREATED' WHERE id = ?", b.package_id);
-  if (who !== 'client') await notify(q, b.customer_id, 'RÃ©servation annulÃ©e', `${b.from_city} â†’ ${b.to_city} : ${who === 'driver' ? 'le chauffeur a dÃ» annuler' : 'annulÃ©e par Bokk Yoon'}.${refund ? ' Remboursement : ' + refund.toLocaleString('fr-FR') + ' FCFA.' : ''}`, `#/reservation/${b.id}`, 'warning');
+  if (who !== 'client') await notify(q, b.customer_id, 'RÃ©servation annulÃ©e', `${b.from_city} â†’ ${b.to_city} : ${who === 'driver' ? 'le chauffeur a dÃ» annuler' : 'annulÃ©e par Bokk Yoon'}.${refund ? ' Remboursement : ' + refund.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ') + ' FCFA.' : ''}`, `#/reservation/${b.id}`, 'warning');
   if (who !== 'driver' && b.status === 'PAID') await notify(q, b.driver_id, 'RÃ©servation annulÃ©e', `${b.from_city} â†’ ${b.to_city} Â· ${b.kind === 'PARCEL' ? 'colis' : b.seats + ' place(s)'}`, `#/mission/${b.id}`, 'warning');
   if (b.package_id) await notifyPartner(q, env, b.id, 'shipment.cancelled');
   return { status: b.status === 'PAID' ? 'REFUNDED' : 'CANCELLED', refund, driverCompensation: driverComp };
@@ -1417,7 +1417,7 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
       if (b.package_id) await q.run('UPDATE packages SET status = ? WHERE id = ?', back === 'COMPLETED' ? 'DELIVERED' : back === 'IN_PROGRESS' ? 'PICKED_UP' : 'PAID', b.package_id);
     }
     await q.run("UPDATE disputes SET status = 'CLOSED', decision = ?, refund_amount = ?, handled_by = ?, closed_at = ? WHERE id = ?", decision + ' : ' + reason, amount, a.id, now, d.id);
-    await notify(q, b.customer_id, 'RÃ©clamation traitÃ©e', decision === 'REFUND' ? `Remboursement de ${amount.toLocaleString('fr-FR')} FCFA.` : reason, `#/reservation/${b.id}`, 'info');
+    await notify(q, b.customer_id, 'RÃ©clamation traitÃ©e', decision === 'REFUND' ? `Remboursement de ${amount.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA.` : reason, `#/reservation/${b.id}`, 'info');
     await audit(q, a.id, 'dispute.' + decision.toLowerCase(), 'dispute', d.id, { amount, reason });
     return ok({ ok: true });
   }
@@ -1462,7 +1462,7 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
     await q.run('INSERT INTO payouts (id, driver_id, amount, bookings_count, provider, reference, note, paid_by, created_at) VALUES (?,?,?,?,?,?,?,?,?)', pid, driverId, due.a, due.n, str(body.provider, 20) || dp.payout_provider, reference, str(body.note, 200), a.id, now);
     const vref = await setRef(q, 'payouts', pid);
     await q.run("UPDATE bookings SET payout_status = 'PAID', payout_id = ?, updated_at = ? WHERE driver_id = ? AND payout_status = 'DUE' AND payout_due_at <= ?", pid, now, driverId, now);
-    await notify(q, driverId, 'Paiement reÃ§u', `${due.a.toLocaleString('fr-FR')} FCFA versÃ©s pour ${due.n} mission(s). ${vref} Â· rÃ©f. ${reference}.`, '#/gains', 'success');
+    await notify(q, driverId, 'Paiement reÃ§u', `${due.a.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA versÃ©s pour ${due.n} mission(s). ${vref} Â· rÃ©f. ${reference}.`, '#/gains', 'success');
     await audit(q, a.id, 'payout.paid', 'user', driverId, { amount: due.a, reference });
     return ok({ amount: due.a, count: due.n });
   }
@@ -1582,9 +1582,9 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
     for (const b of await q.all('SELECT id, ref, from_city, to_city, status FROM bookings WHERE ref LIKE ? LIMIT 6', like)) out.push({ kind: 'RÃ©servation', ref: b.ref, label: `${b.from_city} â†’ ${b.to_city} Â· ${b.status}`, link: `#/reservations?q=${b.ref}` });
     for (const p of await q.all('SELECT p.id, p.ref, p.origin, p.dest, (SELECT id FROM bookings b WHERE b.package_id = p.id ORDER BY created_at DESC) bid, (SELECT ref FROM bookings b WHERE b.package_id = p.id ORDER BY created_at DESC) bref FROM packages p WHERE p.ref LIKE ? LIMIT 6', like)) out.push({ kind: 'Colis', ref: p.ref, label: `${p.origin} â†’ ${p.dest}${p.bref ? ' Â· ' + p.bref : ''}`, link: p.bref ? `#/reservations?q=${p.bref}` : '#/reservations' });
     for (const x of await q.all('SELECT id, ref, origin, dest FROM trips WHERE ref LIKE ? LIMIT 6', like)) out.push({ kind: 'Trajet', ref: x.ref, label: `${x.origin} â†’ ${x.dest}`, link: `#/trajets?q=${x.ref}` });
-    for (const i of await q.all('SELECT id, number, total FROM invoices WHERE number LIKE ? LIMIT 6', like)) out.push({ kind: 'Facture', ref: i.number, label: `${i.total.toLocaleString('fr-FR')} FCFA`, link: `../imprimer/?doc=facture&id=${i.id}&s=admin` });
+    for (const i of await q.all('SELECT id, number, total FROM invoices WHERE number LIKE ? LIMIT 6', like)) out.push({ kind: 'Facture', ref: i.number, label: `${i.total.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA`, link: `../imprimer/?doc=facture&id=${i.id}&s=admin` });
     for (const k of await q.all('SELECT id, ref, subject FROM tickets WHERE ref LIKE ? LIMIT 6', like)) out.push({ kind: 'Message', ref: k.ref, label: k.subject, link: `#/messages/${k.id}` });
-    for (const v of await q.all('SELECT p.ref, p.amount, u.name FROM payouts p JOIN users u ON u.id = p.driver_id WHERE p.ref LIKE ? LIMIT 6', like)) out.push({ kind: 'Versement', ref: v.ref, label: `${v.name} Â· ${v.amount.toLocaleString('fr-FR')} FCFA`, link: '#/paiements' });
+    for (const v of await q.all('SELECT p.ref, p.amount, u.name FROM payouts p JOIN users u ON u.id = p.driver_id WHERE p.ref LIKE ? LIMIT 6', like)) out.push({ kind: 'Versement', ref: v.ref, label: `${v.name} Â· ${v.amount.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA`, link: '#/paiements' });
     return ok({ results: out });
   }
   // --- Exports CSV ---
@@ -1823,7 +1823,7 @@ async function partnerRoutes({ q, env, is, r3, body, headers }) {
     const ref = await setRef(q, 'packages', id); await setRef(q, 'bookings', bid);
     await invoiceForBooking(q, await q.first('SELECT * FROM bookings WHERE id = ?', bid), 'DUE');
     await q.run("INSERT INTO payments (id, booking_id, provider, provider_ref, amount, status, created_at) VALUES (?,?,'PARTNER',?,?,'CAPTURED',?)", uid(), bid, 'PRT-' + randomHex(6).toUpperCase(), am.client, now);
-    await notify(q, best.trip.driver_id, 'Nouveau colis confirmÃ©', `${p.origin} â†’ ${p.dest} Â· vous recevrez ${am.driver.toLocaleString('fr-FR')} FCFA`, `#/mission/${bid}`, 'success');
+    await notify(q, best.trip.driver_id, 'Nouveau colis confirmÃ©', `${p.origin} â†’ ${p.dest} Â· vous recevrez ${am.driver.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA`, `#/mission/${bid}`, 'success');
     await notifyPartner(q, env, bid, 'shipment.confirmed');
     return ok({ shipmentId: id, reference: ref, status: 'CONFIRMED', price: am.client, currency: 'XOF', departureAt: best.trip.departure_at, note: 'Montant provisionnÃ© sur votre compte partenaire, facturÃ© Ã  la livraison.' }, 201);
   }

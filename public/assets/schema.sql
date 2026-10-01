@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 CREATE TABLE IF NOT EXISTS messages (
   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL REFERENCES bookings(id),
-  sender_id TEXT NOT NULL REFERENCES users(id), body TEXT NOT NULL,
+  sender_id TEXT NOT NULL REFERENCES users(id), body TEXT NOT NULL, image_url TEXT,
   masked INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS messages_booking ON messages(booking_id, created_at);

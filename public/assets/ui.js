@@ -176,7 +176,7 @@ export const newsCat = (c) => `<span class="news-cat ${c}">${NEWS_CAT[c] || c}</
 export async function renderNews(el, { audience, limit = 4, hrefBase = '#/actualites/' } = {}) {
   try {
     const r = await api('GET', '/news?' + qs({ audience, limit }));
-    el.innerHTML = r.results.length ? r.results.map((n) => `<a class="card card-link news-card" href="${hrefBase}${esc(n.slug)}">${newsCat(n.category)}<strong>${esc(n.title)}</strong><span class="small muted">${esc(n.summary)}</span><span class="xs muted">${fmtDate(n.published_at)}</span></a>`).join('') : '<p class="muted small">Pas d\'actualité pour le moment.</p>';
+    el.innerHTML = r.results.length ? r.results.map((n) => `<a class="card card-link news-card" href="${hrefBase}${esc(n.slug)}">${n.image_url ? `<img src="${n.image_url}" style="width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px">` : ''}${newsCat(n.category)}<strong>${esc(n.title)}</strong><span class="small muted">${esc(n.summary)}</span><span class="xs muted">${fmtDate(n.published_at)}</span></a>`).join('') : '<p class="muted small">Pas d\'actualité pour le moment.</p>';
   } catch { el.innerHTML = ''; }
 }
 export async function articlePage({ set }, slug, back = '#/') {

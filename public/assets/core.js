@@ -185,7 +185,7 @@ export function validatePackage(p) {
   if (dims.some((d) => !(d > 0))) errors.push('Dimensions invalides.');
   if (Math.max(...dims) > LIMITS.parcelMaxCm) errors.push(`Côté maximum : ${LIMITS.parcelMaxCm} cm.`);
   if (dims.reduce((s, d) => s + d, 0) > LIMITS.parcelMaxSumCm) errors.push(`Somme des côtés maximum : ${LIMITS.parcelMaxSumCm} cm.`);
-  if (Number(p.declared_value) > LIMITS.parcelMaxValue) errors.push(`Valeur déclarée maximum : ${LIMITS.parcelMaxValue.toLocaleString('fr-FR')} FCFA.`);
+  if (Number(p.declared_value) > LIMITS.parcelMaxValue) errors.push(`Valeur déclarée maximum : ${LIMITS.parcelMaxValue.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA.`);
   return errors;
 }
 
@@ -255,4 +255,4 @@ export function estimatePosition(trip, now = new Date()) {
   };
 }
 
-export const fcfa = (n) => `${Math.round(Number(n) || 0).toLocaleString('fr-FR')} FCFA`;
+export const fcfa = (n) => `${Math.round(Number(n) || 0).toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA`;
