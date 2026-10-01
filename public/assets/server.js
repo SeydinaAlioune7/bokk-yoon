@@ -19,7 +19,7 @@ const randomHex = (n) => { const a = new Uint8Array(n); crypto.getRandomValues(a
 const str = (v, max = 500) => String(v ?? '').trim().slice(0, max);
 const int = (v) => { const n = Number(v); return Number.isFinite(n) ? Math.round(n) : NaN; };
 const addHours = (h) => new Date(Date.now() + h * 3600000).toISOString();
-const slugify = (s) => str(s, 80).toLowerCase().normalize('NFD').replace(/[Ì€-Í¯]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'article';
+const slugify = (s) => str(s, 80).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'article';
 
 export function normalizePhone(raw) {
   let p = String(raw || '').replace(/[\s.\-()]/g, '');
@@ -1833,5 +1833,6 @@ async function partnerRoutes({ q, env, is, r3, body, headers }) {
   }
   fail(404, 'ROUTE_NOT_FOUND', 'Route partenaire inconnue.');
 }
+
 
 
