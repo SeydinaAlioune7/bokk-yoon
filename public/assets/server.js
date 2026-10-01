@@ -685,7 +685,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       if (!ownerTakeover && !SPACE_ROLES[space].includes(existing.role)) fail(403, 'WRONG_SPACE', `Ce numÃ©ro est rattachÃ© Ã  ${SPACE_LABEL[roleSpace(existing.role)]}. Chaque espace est sÃ©parÃ© : utilisez ${SPACE_LABEL[roleSpace(existing.role)]}${existing.role === 'client' ? ' ou un autre numÃ©ro pour devenir chauffeur' : ''}.`);
     } else if (space === 'admin' && !admins.includes(phone)) fail(403, 'TEAM_ONLY', 'AccÃ¨s rÃ©servÃ© Ã  l\'Ã©quipe Bokk Yoon.');
     if (seg[2] === 'request') {
-      const isAdminPassword = space === 'admin' && env.ADMIN_PASSWORD && body.code === env.ADMIN_PASSWORD;
+      if (space === 'admin' && env.ADMIN_PASSWORD && body.password !== env.ADMIN_PASSWORD) fail(403, 'WRONG_PASSWORD', 'Mot de passe équipe incorrect.');
     const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
       const winStart = row && Date.now() - new Date(row.window_start) < 15 * 60000 ? row.window_start : nowIso();
       const sent = row && winStart === row.window_start ? row.sent_count + 1 : 1;
@@ -699,9 +699,9 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     }
     const isAdminPassword = space === 'admin' && env.ADMIN_PASSWORD && body.code === env.ADMIN_PASSWORD;
     const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
-    if (!isAdminPassword && (!row || row.expires_at < nowIso())) fail(400, 'OTP_EXPIRED', 'Code expirÃ©. Demandez-en un nouveau.');
-    if (!isAdminPassword && row && row.attempts >= 5) fail(429, 'OTP_LOCKED', 'Trop d\'essais. Demandez un nouveau code.');
-    if (!isAdminPassword && (await sha256(phone + ':' + str(body.code, 6))) !== row?.code_hash) { await q.run('UPDATE otps SET attempts = attempts + 1 WHERE phone = ?', phone); fail(400, 'OTP_WRONG', 'Code incorrect.'); }
+    if (!row || row.expires_at < nowIso()) fail(400, 'OTP_EXPIRED', 'Code expirÃ©. Demandez-en un nouveau.');
+    if (row && row.attempts >= 5) fail(429, 'OTP_LOCKED', 'Trop d\'essais. Demandez un nouveau code.');
+    if ((await sha256(phone + ':' + str(body.code, 6))) !== row?.code_hash) { await q.run('UPDATE otps SET attempts = attempts + 1 WHERE phone = ?', phone); fail(400, 'OTP_WRONG', 'Code incorrect.'); }
     await q.run('DELETE FROM otps WHERE phone = ?', phone);
     let u = existing;
     if (u && body.email && body.email !== u.email) { await q.run('UPDATE users SET email = ? WHERE id = ?', str(body.email, 120).toLowerCase(), u.id); }
