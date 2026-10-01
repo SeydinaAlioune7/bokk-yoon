@@ -685,7 +685,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       if (!ownerTakeover && !SPACE_ROLES[space].includes(existing.role)) fail(403, 'WRONG_SPACE', `Ce numÃ©ro est rattachÃ© Ã  ${SPACE_LABEL[roleSpace(existing.role)]}. Chaque espace est sÃ©parÃ© : utilisez ${SPACE_LABEL[roleSpace(existing.role)]}${existing.role === 'client' ? ' ou un autre numÃ©ro pour devenir chauffeur' : ''}.`);
     } else if (space === 'admin' && !admins.includes(phone)) fail(403, 'TEAM_ONLY', 'AccÃ¨s rÃ©servÃ© Ã  l\'Ã©quipe Bokk Yoon.');
     if (seg[2] === 'request') {
-      if (space === 'admin' && env.ADMIN_PASSWORD && body.password !== env.ADMIN_PASSWORD) fail(403, 'WRONG_PASSWORD', 'Mot de passe équipe incorrect.');
+      
     const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
       const winStart = row && Date.now() - new Date(row.window_start) < 15 * 60000 ? row.window_start : nowIso();
       const sent = row && winStart === row.window_start ? row.sent_count + 1 : 1;
@@ -697,7 +697,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       if (body.email) await sendEmail(env, str(body.email, 120).toLowerCase(), 'Code de validation Bokk Yoon', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
       return ok({ sent: true, phone, isNew: !existing, demoCode: (env.DEMO_OTP !== 'false' && space !== 'admin') ? code : undefined });
     }
-    const isAdminPassword = space === 'admin' && env.ADMIN_PASSWORD && body.code === env.ADMIN_PASSWORD;
+    if (space === 'admin' && env.ADMIN_PASSWORD && body.password !== env.ADMIN_PASSWORD) fail(403, 'WRONG_PASSWORD', 'Mot de passe équipe incorrect.');
     const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
     if (!row || row.expires_at < nowIso()) fail(400, 'OTP_EXPIRED', 'Code expirÃ©. Demandez-en un nouveau.');
     if (row && row.attempts >= 5) fail(429, 'OTP_LOCKED', 'Trop d\'essais. Demandez un nouveau code.');
