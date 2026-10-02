@@ -22,7 +22,7 @@ const NAV = [
   [null, null, 'Opérations'], ['bookings', '#/reservations', 'Réservations'], ['trips', '#/trajets', 'Trajets'], ['issues', '#/litiges', 'Litiges et signalements'], ['msg', '#/messages', 'Messages reçus'],
   [null, null, 'Membres'], ['drivers', '#/chauffeurs', 'Chauffeurs'], ['clients', '#/clients', 'Clients'], ['fb', '#/retours', 'Retours clients'],
   [null, null, 'Finances'], ['cash', '#/encaissements', 'Encaissements Wave / OM'], ['payouts', '#/paiements', 'Paiements chauffeurs'], ['inv', '#/factures', 'Factures'], ['pricing', '#/tarifs', 'Tarifs et types d\'envoi'], ['promo', '#/promotions', 'Codes promo'], ['calc', '#/calculatrice', 'Calculatrice'],
-  [null, null, 'Communication'], ['news', '#/actualites', 'Actualités et alertes'],
+  [null, null, 'Communication'], ['news', '#/actualites', 'Actualit\u00E9s et alertes'], ['kiosque', '#/kiosque', 'Kiosque'],
   [null, null, 'Administration'], ['company', '#/entreprise', 'Entreprise et facture'], ['team', '#/equipe', 'Équipe'], ['log', '#/journal', 'Journal'],
 ];
 let openTickets = 0, pendingClaims = 0;
