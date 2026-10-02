@@ -1,11 +1,28 @@
 
-window.showImage = function(src) {
+
+window.kiosqueImages = [];
+window.showGallery = function(idx) {
+  if (document.getElementById('k-lightbox')) document.getElementById('k-lightbox').remove();
+  if (!window.kiosqueImages || !window.kiosqueImages.length) return;
+  idx = (idx + window.kiosqueImages.length) % window.kiosqueImages.length;
+  const src = window.kiosqueImages[idx].image_data;
   const d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer';
-  d.innerHTML = '<img src="' + src + '" style="max-width:100%;max-height:100%;object-fit:contain">';
+  d.id = 'k-lightbox';
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  
+  const closeBtn = '<button style="position:absolute;top:20px;right:20px;background:none;border:none;color:#fff;font-size:40px;cursor:pointer;line-height:1;z-index:10000" onclick="document.getElementById(\'k-lightbox\').remove()">&times;</button>';
+  
+  let navBtns = '';
+  if (window.kiosqueImages.length > 1) {
+    navBtns += '<button style="position:absolute;left:20px;background:rgba(0,0,0,0.5);border-radius:50%;border:none;color:#fff;font-size:30px;width:50px;height:50px;cursor:pointer;z-index:10000;display:flex;align-items:center;justify-content:center" onclick="event.stopPropagation(); showGallery(' + (idx - 1) + ')">&#10094;</button>';
+    navBtns += '<button style="position:absolute;right:20px;background:rgba(0,0,0,0.5);border-radius:50%;border:none;color:#fff;font-size:30px;width:50px;height:50px;cursor:pointer;z-index:10000;display:flex;align-items:center;justify-content:center" onclick="event.stopPropagation(); showGallery(' + (idx + 1) + ')">&#10095;</button>';
+  }
+  
+  d.innerHTML = closeBtn + navBtns + '<img src="' + esc(src) + '" style="max-width:80vw;max-height:90vh;object-fit:contain;border-radius:8px" onclick="event.stopPropagation()">';
   d.onclick = () => d.remove();
   document.body.appendChild(d);
 };
+
 ﻿import { cityByName, quote, DEFAULT_SETTINGS, CITIES, REGIONS, fcfa } from './core.js';
 import { api } from './api.js';
 import { createMap, REGION_COLORS } from './map.js';
@@ -40,8 +57,9 @@ const card = (a, b, q) => { const h = Math.floor(q.durationMin / 60), m = q.dura
   try {
     const p = await api('GET', '/press?limit=6');
     if (p.results && p.results.length) {
+      window.kiosqueImages = p.results;
       document.getElementById('kiosque').style.display = 'block';
-      kgrid.innerHTML = p.results.map((r) => `<div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="showImage('`+esc(r.image_data)+`')"><img src="`+esc(r.image_data)+`" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">`+esc(r.name)+`</strong><div class="xs muted">`+esc(r.publish_date)+`</div></div></div>`).join('');
+      kgrid.innerHTML = p.results.map((r, i) => `<div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="showGallery(`+i+`)"><img src="`+esc(r.image_data)+`" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">`+esc(r.name)+`</strong><div class="xs muted">`+esc(r.publish_date)+`</div></div></div>`).join('');
     }
   } catch (e) { /* no press */ }
   const list = document.getElementById('news-list');
