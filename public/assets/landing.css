@@ -1,4 +1,4 @@
-/* Bokk Yoon — site vitrine */
+﻿/* Bokk Yoon — site vitrine */
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { overflow-x: hidden; }
@@ -105,8 +105,8 @@ body { overflow-x: hidden; }
 .ticks li::before { content: '✓'; position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff; font-size: .7rem; display: grid; place-items: center; }
 
 /* Étapes */
-.how-tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px; margin: 20px 0 30px; }
-.how-tabs button { border: 0; background: transparent; font: 700 .95rem var(--font); padding: 10px 18px; border-radius: 999px; cursor: pointer; color: var(--muted); }
+.how-tabs { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px; margin: 20px 0 30px; width: max-content; }
+.how-tabs button { border: 0; background: transparent; font: 700 .95rem var(--font); padding: 10px 20px; border-radius: 999px; cursor: pointer; color: var(--muted); transition: background .25s, color .25s; white-space: nowrap; flex-shrink: 0; }
 .how-tabs button.on { background: var(--primary); color: var(--on-primary); }
 .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; counter-reset: s; }
 @media (min-width: 820px) { .steps { grid-template-columns: repeat(4, 1fr); } }
