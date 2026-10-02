@@ -847,7 +847,7 @@ const router = createRouter(view, [
   [/^\/?$/, dash, 'dash'], [/^\/direct$/, live, 'live'],
   [/^\/chauffeurs$/, (c) => members(c, 'driver'), 'drivers'], [/^\/clients$/, (c) => members(c, 'client'), 'clients'], [/^\/membre\/([\w-]+)$/, member, 'drivers'],
   [/^\/reservations$/, bookings, 'bookings'], [/^\/trajets$/, trips, 'trips'], [/^\/litiges$/, issues, 'issues'], [/^\/paiements$/, payouts, 'payouts'],
-  [/^\/tarifs$/, pricing, 'pricing'], [/^\/actualites$/, news, 'news'], [/^\/equipe$/, team, 'team'], [/^\/journal$/, journal, 'log'],
+  [/^\/tarifs$/, pricing, 'pricing'], [/^\/actualites$/, news, 'news'], [/^\/kiosque$/, kiosque, 'kiosque'], [/^\/equipe$/, team, 'team'], [/^\/journal$/, journal, 'log'],
   [/^\/recherche$/, searchPage, ''], [/^\/messages$/, inbox, 'msg'], [/^\/messages\/([\w-]+)$/, ticketAdmin, 'msg'], [/^\/retours$/, feedbackPage, 'fb'],
   [/^\/factures$/, invoices, 'inv'], [/^\/entreprise$/, company, 'company'], [/^\/promotions$/, promos, 'promo'], [/^\/calculatrice$/, calculator, 'calc'], [/^\/territoire$/, territory, 'map'], [/^\/encaissements$/, cashPage, 'cash'],
 ], { onRoute: (k) => { const n = document.getElementById('side'); n.dataset.active = k; n.querySelectorAll('a').forEach((a) => a.classList.toggle('on', a.dataset.k === k)); } });

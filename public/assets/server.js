@@ -627,6 +627,11 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     const served = new Set(rows.flatMap((r) => [r.origin, r.dest]));
     return ok({ regions: REGIONS.map((r) => ({ name: r, cities: CITIES.filter((c) => c.region === r).map((c) => ({ ...c, served: served.has(c.name) })) })), corridors: rows, tripsOpen: rows.reduce((s, r) => s + r.n, 0) });
   }
+    if (is('GET', 'press')) {
+    const limit = Math.min(20, int(query.limit) || 10);
+    const rows = await q.all("SELECT id, publish_date, name, image_data FROM daily_press ORDER BY publish_date DESC, created_at DESC LIMIT ?", limit);
+    return ok({ results: rows });
+  }
   if (is('GET', 'news')) {
     const aud = ['CLIENTS', 'DRIVERS'].includes(query.audience) ? query.audience : null;
     const rows = await q.all(`SELECT id, slug, title, summary, category, audience, image_url, published_at FROM news WHERE status = 'PUBLISHED' ${aud ? "AND audience IN ('ALL', ?)" : ''} ORDER BY published_at DESC LIMIT ?`, ...(aud ? [aud] : []), Math.min(50, int(query.limit) || 12));
@@ -1524,6 +1529,18 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
   }
 
   // --- ActualitÃ©s, alertes route, messages groupÃ©s ---
+    if (is('GET', 'admin', 'press')) return ok({ results: await q.all('SELECT id, publish_date, name, image_data, created_at FROM daily_press ORDER BY publish_date DESC, created_at DESC LIMIT 50') });
+  if (is('POST', 'admin', 'press')) {
+    const date = str(body.publish_date, 20), name = str(body.name, 100), image = body.image_data;
+    if (!date || !name || !image) fail(400, 'PRESS_INVALID', 'Date, nom et image sont requis.');
+    const id = uid();
+    await q.run('INSERT INTO daily_press (id, publish_date, name, image_data, created_at) VALUES (?, ?, ?, ?, ?)', id, date, name, image, now);
+    return ok({ id });
+  }
+  if (is('DELETE', 'admin', 'press', '*')) {
+    await q.run('DELETE FROM daily_press WHERE id = ?', r1);
+    return ok();
+  }
   if (is('GET', 'admin', 'news')) return ok({ results: await q.all('SELECT * FROM news ORDER BY created_at DESC LIMIT 100') });
   if (is('POST', 'admin', 'news')) {
     const title = str(body.title, 140), summary = str(body.summary, 300), text = str(body.body, 8000);

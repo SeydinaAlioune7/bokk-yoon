@@ -335,3 +335,12 @@ CREATE TABLE IF NOT EXISTS payment_claims (
 );
 CREATE INDEX IF NOT EXISTS payment_claims_status ON payment_claims(status, created_at);
 CREATE UNIQUE INDEX IF NOT EXISTS payment_claims_txn ON payment_claims(provider, transaction_ref);
+
+CREATE TABLE IF NOT EXISTS daily_press (
+  id TEXT PRIMARY KEY,
+  publish_date TEXT NOT NULL,
+  name TEXT NOT NULL,
+  image_data TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS daily_press_date ON daily_press(publish_date);

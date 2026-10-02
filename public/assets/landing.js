@@ -1,4 +1,4 @@
-import { cityByName, quote, DEFAULT_SETTINGS, CITIES, REGIONS, fcfa } from './core.js';
+﻿import { cityByName, quote, DEFAULT_SETTINGS, CITIES, REGIONS, fcfa } from './core.js';
 import { api } from './api.js';
 import { createMap, REGION_COLORS } from './map.js';
 
@@ -28,6 +28,14 @@ const card = (a, b, q) => { const h = Math.floor(q.durationMin / 60), m = q.dura
 
 // Actualités et alertes
 (async () => {
+    const kgrid = document.getElementById('kiosque-grid');
+  try {
+    const p = await api('GET', '/press?limit=6');
+    if (p.results && p.results.length) {
+      document.getElementById('kiosque').style.display = 'block';
+      kgrid.innerHTML = p.results.map((r) => <div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="window.open('+esc(r.image_data)+', '_blank')"><img src="+esc(r.image_data)+" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">+esc(r.name)+</strong><div class="xs muted">+esc(r.publish_date)+</div></div></div>).join('');
+    }
+  } catch (e) { /* no press */ }
   const list = document.getElementById('news-list');
   try {
     const r = await api('GET', '/news?limit=3');
