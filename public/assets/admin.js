@@ -843,6 +843,53 @@ async function territory(ctx) {
   if (m) ctx.cleanup(() => m.destroy());
 }
 
+async function kiosque(ctx) {
+  const u = await guard(ctx); if (!u) return;
+  const d = await api('GET', '/admin/press');
+  view(`
+    <div class="row between"><h2>Kiosque (Unes du jour)</h2><button class="btn btn-primary" id="btn-add">Ajouter une Une</button></div>
+    <div class="grid" style="margin-top:20px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
+      ` + (d.results.length ? d.results.map((r) => `<div class="card" style="padding:0;overflow:hidden"><img src="` + esc(r.image_data) + `" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid var(--border)"><div style="padding:12px"><strong>` + esc(r.name) + `</strong><div class="xs muted">` + esc(r.publish_date) + `</div><button class="btn btn-ghost btn-sm" style="margin-top:8px;color:var(--terra)" data-del="` + r.id + `">Supprimer</button></div></div>`).join('') : '<p class="muted">Aucune Une en ligne.</p>') + `
+    </div>
+  `, (root) => {
+    root.querySelector('#btn-add').addEventListener('click', () => sheet(`
+      <h3>Publier une Une</h3>
+      <form id="pform" class="stack">
+        <div class="field"><label>Date de parution</label><input type="date" name="publish_date" required value="` + new Date().toISOString().split('T')[0] + `"></div>
+        <div class="field"><label>Nom du journal</label><input type="text" name="name" required placeholder="Ex: Le Soleil, Seneweb..."></div>
+        <div class="field"><label>Image (Photo de la Une)</label><input type="file" accept="image/*" id="pfile" required></div>
+        <canvas id="pcv" hidden></canvas>
+        <button class="btn btn-primary btn-block" type="submit">Mettre en ligne</button>
+      </form>
+    `, (s, close) => {
+      s.querySelector('#pform').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = e.target, file = f.querySelector('#pfile').files[0];
+        if (!file) return toast('Image requise', 'error');
+        submitting(f, async () => {
+          const img = new Image();
+          img.src = URL.createObjectURL(file);
+          await new Promise((res) => { img.onload = res; });
+          const cv = s.querySelector('#pcv'), cx = cv.getContext('2d');
+          const scale = Math.min(1, 1000 / Math.max(img.width, img.height));
+          cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+          cx.fillStyle = '#fff'; cx.fillRect(0,0,cv.width,cv.height);
+          cx.drawImage(img, 0,0, cv.width, cv.height);
+          const b64 = cv.toDataURL('image/jpeg', 0.85);
+          
+          await api('POST', '/admin/press', { publish_date: f.publish_date.value, name: f.name.value, image_data: b64 });
+          toast('Une publie avec succs');
+          close(); ctx.render();
+        });
+      });
+    }));
+    
+    on(root, '[data-del]', 'click', (e) => confirmSheet('Supprimer cette Une ?', 'Elle n\'apparatra plus sur l\'accueil.', async () => {
+      await api('DELETE', '/admin/press/' + e.target.dataset.del);
+      toast('Une supprime'); ctx.render();
+    }, 'Supprimer', { danger: true }));
+  });
+}
 const router = createRouter(view, [
   [/^\/?$/, dash, 'dash'], [/^\/direct$/, live, 'live'],
   [/^\/chauffeurs$/, (c) => members(c, 'driver'), 'drivers'], [/^\/clients$/, (c) => members(c, 'client'), 'clients'], [/^\/membre\/([\w-]+)$/, member, 'drivers'],
