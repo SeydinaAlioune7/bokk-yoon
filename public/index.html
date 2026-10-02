@@ -333,6 +333,7 @@
     </div>
     <div class="wrap small foot-note">© <span id="yr"></span> Bokk Yoon · Prototype - le paiement est simulé tant que l'agrément du prestataire n'est pas finalisé.</div>
   </footer>
+  <script>document.querySelectorAll("[data-how]").forEach(function(btn){btn.addEventListener("click",function(){document.querySelectorAll("[data-how]").forEach(function(b){b.classList.toggle("on",b===btn);b.setAttribute("aria-selected",b===btn);});document.querySelectorAll("[data-panel]").forEach(function(p){p.hidden=p.dataset.panel!==btn.dataset.how;});});});</script>
   <script type="module" src="assets/landing.js"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script></body>
 </html>
