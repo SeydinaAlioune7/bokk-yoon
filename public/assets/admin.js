@@ -1,4 +1,4 @@
-// Bokk Yoon — espace équipe (propriétaire = super-admin, membres de l'équipe = admin).
+﻿// Bokk Yoon — espace équipe (propriétaire = super-admin, membres de l'équipe = admin).
 import {
   fmtDur, api, token, esc, fmtDay, fmtTime, fmtDT, fmtDate, ago, qs, stars, fcfa, cityOptions, initials,
   toast, sheet, errBox, submitting, on, act, BOOKING, TRIP, PAYOUT, PROVIDERS, badge, confirmSheet,
@@ -571,6 +571,14 @@ function readQrImage(file) {
         const jsQR = await loadJsQR();
         const d = cx.getImageData(0, 0, cv.width, cv.height);
         text = jsQR(d.data, cv.width, cv.height)?.data || '';
+        if (!text) {
+          const dat = d.data;
+          for (let i = 0; i < dat.length; i += 4) {
+            const v = Math.min(dat[i], dat[i+1], dat[i+2]) < 200 ? 0 : 255;
+            dat[i] = dat[i+1] = dat[i+2] = v;
+          }
+          text = jsQR(dat, cv.width, cv.height)?.data || '';
+        }
       } catch { /* lecture facultative */ }
       // On retourne l'image ORIGINALE (non dégradée) pour que le QR reste scannable
       resolve({ data: originalData, text });
