@@ -1,3 +1,11 @@
+
+window.showImage = function(src) {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer';
+  d.innerHTML = '<img src="' + src + '" style="max-width:100%;max-height:100%;object-fit:contain">';
+  d.onclick = () => d.remove();
+  document.body.appendChild(d);
+};
 ﻿import { cityByName, quote, DEFAULT_SETTINGS, CITIES, REGIONS, fcfa } from './core.js';
 import { api } from './api.js';
 import { createMap, REGION_COLORS } from './map.js';
@@ -33,7 +41,7 @@ const card = (a, b, q) => { const h = Math.floor(q.durationMin / 60), m = q.dura
     const p = await api('GET', '/press?limit=6');
     if (p.results && p.results.length) {
       document.getElementById('kiosque').style.display = 'block';
-      kgrid.innerHTML = p.results.map((r) => `<div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="window.open('`+esc(r.image_data)+`', '_blank')"><img src="`+esc(r.image_data)+`" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">`+esc(r.name)+`</strong><div class="xs muted">`+esc(r.publish_date)+`</div></div></div>`).join('');
+      kgrid.innerHTML = p.results.map((r) => `<div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="showImage('`+esc(r.image_data)+`')"><img src="`+esc(r.image_data)+`" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">`+esc(r.name)+`</strong><div class="xs muted">`+esc(r.publish_date)+`</div></div></div>`).join('');
     }
   } catch (e) { /* no press */ }
   const list = document.getElementById('news-list');
