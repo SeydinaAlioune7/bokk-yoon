@@ -846,12 +846,12 @@ async function territory(ctx) {
 async function kiosque(ctx) {
   const u = await guard(ctx); if (!u) return;
   const d = await api('GET', '/admin/press');
-  view(`
+  const root = ctx.set(`
     <div class="row between"><h2>Kiosque (Unes du jour)</h2><button class="btn btn-primary" id="btn-add">Ajouter une Une</button></div>
     <div class="grid" style="margin-top:20px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px">
       ` + (d.results.length ? d.results.map((r) => `<div class="card" style="padding:0;overflow:hidden"><img src="` + esc(r.image_data) + `" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid var(--border)"><div style="padding:12px"><strong>` + esc(r.name) + `</strong><div class="xs muted">` + esc(r.publish_date) + `</div><button class="btn btn-ghost btn-sm" style="margin-top:8px;color:var(--terra)" data-del="` + r.id + `">Supprimer</button></div></div>`).join('') : '<p class="muted">Aucune Une en ligne.</p>') + `
     </div>
-  `, (root) => {
+  `);
     root.querySelector('#btn-add').addEventListener('click', () => sheet(`
       <h3>Publier une Une</h3>
       <form id="pform" class="stack">
@@ -888,7 +888,6 @@ async function kiosque(ctx) {
       await api('DELETE', '/admin/press/' + e.target.dataset.del);
       toast('Une supprime'); ctx.render();
     }, 'Supprimer', { danger: true }));
-  });
 }
 const router = createRouter(view, [
   [/^\/?$/, dash, 'dash'], [/^\/direct$/, live, 'live'],
