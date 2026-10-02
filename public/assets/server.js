@@ -1538,7 +1538,7 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
     return ok({ id });
   }
   if (is('DELETE', 'admin', 'press', '*')) {
-    await q.run('DELETE FROM daily_press WHERE id = ?', r1);
+    await q.run('DELETE FROM daily_press WHERE id = ?', r2);
     return ok();
   }
   if (is('GET', 'admin', 'news')) return ok({ results: await q.all('SELECT * FROM news ORDER BY created_at DESC LIMIT 100') });
