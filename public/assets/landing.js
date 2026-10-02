@@ -33,7 +33,7 @@ const card = (a, b, q) => { const h = Math.floor(q.durationMin / 60), m = q.dura
     const p = await api('GET', '/press?limit=6');
     if (p.results && p.results.length) {
       document.getElementById('kiosque').style.display = 'block';
-      kgrid.innerHTML = p.results.map((r) => <div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="window.open('+esc(r.image_data)+', '_blank')"><img src="+esc(r.image_data)+" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">+esc(r.name)+</strong><div class="xs muted">+esc(r.publish_date)+</div></div></div>).join('');
+      kgrid.innerHTML = p.results.map((r) => `<div class="card card-link" style="padding:0;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.1);" onclick="window.open('`+esc(r.image_data)+`', '_blank')"><img src="`+esc(r.image_data)+`" style="width:100%;height:250px;object-fit:cover;border-bottom:1px solid rgba(0,0,0,0.1);"><div style="padding:12px;text-align:center"><strong style="color:#000;font-size:14px">`+esc(r.name)+`</strong><div class="xs muted">`+esc(r.publish_date)+`</div></div></div>`).join('');
     }
   } catch (e) { /* no press */ }
   const list = document.getElementById('news-list');
@@ -118,7 +118,7 @@ const WA = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><pat
   try { c = await api('GET', '/company'); } catch { /* hors ligne */ }
   const wa = (t) => `https://wa.me/${String(c.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent(t)}`;
   const box = document.getElementById('lc-contact');
-    <p class="small" style="margin-top:12px;opacity:.9">${esc(c.hours || '')}${c.email ? ' · ' + esc(c.email) : ''}${c.address ? '<br>' + esc(c.address) : ''}</p>`;
+    `<p class="small" style="margin-top:12px;opacity:.9">${esc(c.hours || '')}${c.email ? ' · ' + esc(c.email) : ''}${c.address ? '<br>' + esc(c.address) : ''}</p>`;
   if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.style.bottom = '20px'; a.href = wa('Bonjour Bokk Yoon, '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire sur WhatsApp'); a.innerHTML = WA; document.body.appendChild(a); }
   const cf = document.getElementById('cform');
   cf.addEventListener('submit', async (e) => {
