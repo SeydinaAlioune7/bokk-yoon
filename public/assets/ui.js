@@ -206,7 +206,7 @@ export function locateMe() {
 // ---------- Démarrage d'un espace ----------
 export async function bootSpace(space) {
   setSpace(space);
-  try { const th = localStorage.getItem('bokkyoon-theme'); if (th) document.documentElement.dataset.theme = th; } catch { /* stockage indisponible */ }
+  document.documentElement.dataset.theme = 'light';
   const m = await mode();
   const mb = document.getElementById('mode-badge');
   if (mb && m === 'demo') { mb.hidden = false; mb.className = 'badge b-sun'; mb.textContent = 'Démo'; mb.title = 'Données de démonstration stockées sur cet appareil'; }
@@ -214,7 +214,7 @@ export async function bootSpace(space) {
   return m;
 }
 export function toggleTheme() {
-  const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const cur = 'light'; document.documentElement.dataset.theme = 'light';
   const next = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next;
   try { localStorage.setItem('bokkyoon-theme', next); } catch { /* ignore */ }
 }

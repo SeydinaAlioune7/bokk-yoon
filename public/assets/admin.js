@@ -555,20 +555,28 @@ const loadJsQR = () => (jsqrPromise ??= new Promise((res, rej) => { if (window.j
 /** Charge l'image du QR code : lit son contenu (lien de paiement) et produit une image nette et légère. */
 function readQrImage(file) {
   return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file), img = new Image();
-    img.onload = async () => {
-      const big = Math.min(1, 1400 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
-      cv.width = Math.round(img.width * big); cv.height = Math.round(img.height * big);
-      const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+    // Lire l'image originale en base64 SANS passer par canvas (pour ne pas corrompre le QR)
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const originalData = ev.target.result; // garde l'image originale intacte
+      // On lit le QR via canvas (juste pour extraire le texte, pas pour sauvegarder)
       let text = '';
-      try { const jsQR = await loadJsQR(); const d = cx.getImageData(0, 0, cv.width, cv.height); text = jsQR(d.data, cv.width, cv.height)?.data || ''; } catch { /* lecture facultative */ }
-      const k = Math.min(1, 720 / Math.max(cv.width, cv.height)), out = document.createElement('canvas');
-      out.width = Math.round(cv.width * k); out.height = Math.round(cv.height * k);
-      out.getContext('2d').drawImage(cv, 0, 0, out.width, out.height); URL.revokeObjectURL(url);
-      let data = out.toDataURL('image/png'); if (data.length > 650000) data = out.toDataURL('image/jpeg', 0.9);
-      resolve({ data, text });
+      try {
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = originalData; });
+        const cv = document.createElement('canvas');
+        const scale = Math.min(1, 1400 / Math.max(img.width, img.height));
+        cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+        const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+        const jsQR = await loadJsQR();
+        const d = cx.getImageData(0, 0, cv.width, cv.height);
+        text = jsQR(d.data, cv.width, cv.height)?.data || '';
+      } catch { /* lecture facultative */ }
+      // On retourne l'image ORIGINALE (non dégradée) pour que le QR reste scannable
+      resolve({ data: originalData, text });
     };
-    img.onerror = () => reject(new Error('Image illisible.')); img.src = url;
+    reader.onerror = () => reject(new Error('Image illisible.'));
+    reader.readAsDataURL(file);
   });
 }
 async function cashPage(ctx) {
