@@ -1,5 +1,5 @@
-// Bokk Yoon — règles métier partagées (API Cloudflare + mode démo navigateur).
-// Modèle opérateur : Bokk Yoon fixe le prix client, encaisse à la réservation et reverse sa part au chauffeur.
+// Démando — règles métier partagées (API Cloudflare + mode démo navigateur).
+// Modèle opérateur : Démando fixe le prix client, encaisse à la réservation et reverse sa part au chauffeur.
 
 export const REGIONS = ['Dakar', 'Thiès', 'Diourbel', 'Fatick', 'Kaolack', 'Kaffrine', 'Louga', 'Saint-Louis', 'Matam', 'Tambacounda', 'Kédougou', 'Kolda', 'Sédhiou', 'Ziguinchor'];
 
@@ -106,16 +106,16 @@ export const DEFAULT_SETTINGS = {
   booking: { paymentWindowMin: 30, payoutDelayHours: 24, clientCancelFullRefundHours: 24, driverAutoApprove: false },
   // Identité de l'entreprise : factures, contact, WhatsApp. Modifiable par le propriétaire.
   company: {
-    name: 'Bokk Yoon', legalName: 'Bokk Yoon SARL (à compléter)', ninea: '', rccm: '', address: 'Dakar, Sénégal', phone: '+221 77 000 00 00',
+    name: 'Démando', legalName: 'Démando SARL (à compléter)', ninea: '', rccm: '', address: 'Dakar, Sénégal', phone: '+221 77 000 00 00',
     whatsapp: '+221770000000', email: 'contact@bokkyoon.sn', website: 'bokkyoon.sn', hours: 'Tous les jours, 7 h – 21 h',
-    payInfo: 'Wave et Orange Money acceptés', footer: 'Merci d\'avoir voyagé avec Bokk Yoon.', vatEnabled: false, vatRate: 18,
+    payInfo: 'Wave et Orange Money acceptés', footer: 'Merci d\'avoir voyagé avec Démando.', vatEnabled: false, vatRate: 18,
     accent: '#0B6E4F', template: 'moderne', logo: '',
   },
   // Encaissement. SIMULATION : paiement fictif (démo). QR : le client paie sur le QR code marchand du propriétaire
   // puis déclare l'ID de transaction ; l'équipe vérifie et confirme. (API Wave Business : voir README.)
   payment: {
     mode: 'AUTO', // AUTO : QR code réel une fois déployé sur Cloudflare, simulation en démo
-    wave: { enabled: true, qr: 'assets/pay/wave-qr.png', link: 'https://qr.wave.com/iVVNfc25fa0c0VTRCd3hEV1hQ/BqvVGl/An40gh/p', number: '', name: 'Bokk Yoon' },
+    wave: { enabled: true, qr: 'assets/pay/wave-qr.png', link: 'https://qr.wave.com/iVVNfc25fa0c0VTRCd3hEV1hQ/BqvVGl/An40gh/p', number: '', name: 'Démando' },
     orange: { enabled: false, qr: '', link: '', number: '', name: '' },
     reviewMinutes: 30, instructions: 'Payez le montant exact, puis indiquez l\'ID de la transaction. Votre réservation est confirmée dès vérification.',
   },

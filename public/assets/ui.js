@@ -1,4 +1,4 @@
-// Bokk Yoon — briques d'interface partagées par les trois espaces (client, chauffeur, équipe).
+// Démando — briques d'interface partagées par les trois espaces (client, chauffeur, équipe).
 import { api, mode, token, setSpace, resetDemo } from './api.js';
 import { CITIES, REGIONS, CATEGORIES, nearestCity } from './core.js';
 export { api, mode, token, resetDemo };
@@ -116,7 +116,7 @@ export function createRouter(view, routes, { onRoute } = {}) {
 const SPACE_TEXT = {
   client: { title: 'Connexion', lead: 'Réservez vos trajets et envoyez vos colis. Un code vous est envoyé par SMS, sans mot de passe.' },
   driver: { title: 'Espace chauffeur', lead: 'Publiez vos trajets, transportez passagers et colis, recevez vos gains sur Wave ou Orange Money.' },
-  admin: { title: 'Espace équipe', lead: 'Accès réservé à l\'équipe Bokk Yoon.' },
+  admin: { title: 'Espace équipe', lead: 'Accès réservé à l\'équipe Démando.' },
 };
 export function loginScreen(set, space, { demoHint = '', onDone }) {
   const t = SPACE_TEXT[space];
@@ -219,13 +219,13 @@ export function toggleTheme() {
   try { localStorage.setItem('bokkyoon-theme', next); } catch { /* ignore */ }
 }
 export function accountBlocked(set, message, space) {
-  set(`<div class="empty card"><h2>Accès impossible</h2><p>${esc(message)}</p><p class="small muted">Pour toute question, contactez le support Bokk Yoon.</p>
+  set(`<div class="empty card"><h2>Accès impossible</h2><p>${esc(message)}</p><p class="small muted">Pour toute question, contactez le support Démando.</p>
     <button class="btn btn-ghost" id="lo">Changer de compte</button></div>`).querySelector('#lo').onclick = () => { token.clear(); location.hash = '#/'; location.reload(); };
 }
 
 // ---------- Contact, aide, documents ----------
 let companyPromise = null;
-export const getCompany = () => (companyPromise ??= api('GET', '/company').catch(() => ({ name: 'Bokk Yoon', whatsapp: '', email: '', phone: '', hours: '' })));
+export const getCompany = () => (companyPromise ??= api('GET', '/company').catch(() => ({ name: 'Démando', whatsapp: '', email: '', phone: '', hours: '' })));
 export const waLink = (number, text) => `https://wa.me/${String(number || '').replace(/[^\d]/g, '')}?text=${encodeURIComponent(text || '')}`;
 export const printUrl = (doc, params, space) => `../imprimer/?${new URLSearchParams({ doc, ...params, s: space }).toString()}`;
 export const qrSrc = (x) => (x && x.startsWith('assets/') ? '../' + x : x || '');
@@ -245,10 +245,10 @@ export const ICONS = {
 };
 export async function contactButtons(context = '') {
   const c = await getCompany();
-  const text = `Bonjour ${c.name || 'Bokk Yoon'}${context ? ', ' + context : ''}.`;
+  const text = `Bonjour ${c.name || 'Démando'}${context ? ', ' + context : ''}.`;
   return `<div class="contact-btns">
     ${c.whatsapp ? `<a class="wa" href="${waLink(c.whatsapp, text)}" target="_blank" rel="noopener">${ICON_WA}WhatsApp</a>` : ''}
-    ${c.email ? `<a href="mailto:${esc(c.email)}?subject=${encodeURIComponent('Bokk Yoon · ' + (context || 'Question'))}">${ICONS.mail}E-mail</a>` : ''}
+    ${c.email ? `<a href="mailto:${esc(c.email)}?subject=${encodeURIComponent('Démando · ' + (context || 'Question'))}">${ICONS.mail}E-mail</a>` : ''}
     ${c.phone ? `<a href="tel:${esc(String(c.phone).replace(/\s/g, ''))}">${ICONS.phone}Appeler</a>` : ''}
   </div><p class="xs muted" style="margin:8px 0 0">${esc(c.hours || '')}${c.email ? ' · ' + esc(c.email) : ''}${c.whatsapp ? ' · WhatsApp ' + esc(c.whatsapp) : ''}</p>`;
 }
@@ -258,7 +258,7 @@ const TICKET_CAT = { QUESTION: 'Question', RECLAMATION: 'Réclamation', SUGGESTI
 export async function helpPage(ctx, { me, bookingRefs = [] }) {
   const p = ctx.params;
   const [mine, buttons] = await Promise.all([api('GET', '/me/tickets'), contactButtons(me.ref ? `je suis ${me.name} (${me.ref})` : '')]);
-  const root = ctx.set(`<h2>Aide et contact</h2><p class="muted small">Écrivez directement au propriétaire de Bokk Yoon : par WhatsApp, par e-mail, ou via le formulaire ci-dessous (réponse dans l'application).</p>
+  const root = ctx.set(`<h2>Aide et contact</h2><p class="muted small">Écrivez directement au propriétaire de Démando : par WhatsApp, par e-mail, ou via le formulaire ci-dessous (réponse dans l'application).</p>
     ${buttons}
     <form class="card" id="cf" style="margin-top:16px" novalidate>${errBox}<h3>Nous écrire</h3>
       <div class="grid grid-2"><div class="field"><label for="cat">Sujet</label><select id="cat" name="category">${Object.entries(TICKET_CAT).map(([k, l]) => `<option value="${k}" ${k === (p.cat || 'QUESTION') ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
@@ -276,7 +276,7 @@ export async function ticketPage(ctx, id) {
   const root = ctx.set(`<a href="#/aide" class="small">← Aide et contact</a>
     <div class="row between" style="margin-top:8px"><h2 style="margin:0">${esc(t.subject)}</h2>${badge(TICKET_STATUS, t.status)}</div>
     <p class="small muted">${refTag(t.ref)} · ${TICKET_CAT[t.category]}${t.booking_ref ? ' · réservation ' + esc(t.booking_ref) : ''}</p>
-    <div class="card"><div class="chat" style="max-height:none">${t.messages.map((m) => `<div class="msg ${m.from_team ? '' : 'mine'}"><span class="xs" style="opacity:.75">${m.from_team ? esc(c.name || 'Bokk Yoon') : 'Vous'} · ${fmtDT(m.created_at)}</span><br>${esc(m.body).replace(/\n/g, '<br>')}</div>`).join('')}</div>
+    <div class="card"><div class="chat" style="max-height:none">${t.messages.map((m) => `<div class="msg ${m.from_team ? '' : 'mine'}"><span class="xs" style="opacity:.75">${m.from_team ? esc(c.name || 'Démando') : 'Vous'} · ${fmtDT(m.created_at)}</span><br>${esc(m.body).replace(/\n/g, '<br>')}</div>`).join('')}</div>
       ${t.status !== 'CLOSED' ? `<form id="rf" class="row" style="margin-top:12px;flex-wrap:nowrap"><input name="body" placeholder="Répondre…" aria-label="Réponse" autocomplete="off"><button class="btn btn-primary btn-sm" type="submit">Envoyer</button></form>` : '<p class="small muted">Conversation close.</p>'}</div>
     ${c.whatsapp ? `<a class="btn btn-ghost btn-block" style="margin-top:12px" target="_blank" rel="noopener" href="${waLink(c.whatsapp, `Bonjour, au sujet de mon message ${t.ref} : `)}">Continuer sur WhatsApp</a>` : ''}`);
   root.querySelector('#rf')?.addEventListener('submit', async (e) => { e.preventDefault(); const i = e.target.body; if (!i.value.trim()) return; try { await api('POST', `/me/tickets/${id}/messages`, { body: i.value }); ctx.render(); } catch (er) { toast(er.message); } });

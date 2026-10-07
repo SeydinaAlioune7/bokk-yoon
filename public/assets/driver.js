@@ -1,4 +1,4 @@
-// Bokk Yoon — espace chauffeur.
+// Démando — espace chauffeur.
 import {
   fmtDur, api, token, esc, fmtDay, fmtTime, fmtDT, fmtDate, ago, today, addDays, initials, catLabel, qs, stars, fcfa, cityOptions,
   toast, sheet, errBox, submitting, on, act, BOOKING, TRIP, PAYOUT, PROVIDERS, badge, routeHtml, confirmSheet,
@@ -25,7 +25,7 @@ async function needDriver(ctx) {
   if (!u.driver || u.driver.status === 'REJECTED') { await applicationForm(ctx, u); return null; }
   if (u.driver.status === 'PENDING') {
     ctx.set(`<div class="welcome driver"><p class="small" style="margin:0;font-weight:700">Dossier envoyé le ${fmtDate(u.driver.submitted_at)}</p><h1>Merci ${esc(u.name.split(' ')[0])} !</h1>
-      <p class="small muted" style="margin:6px 0 0">L'équipe Bokk Yoon vérifie votre pièce, votre permis et votre véhicule. Vous serez prévenu par notification et SMS, en général sous 48 h.</p></div>
+      <p class="small muted" style="margin:6px 0 0">L'équipe Démando vérifie votre pièce, votre permis et votre véhicule. Vous serez prévenu par notification et SMS, en général sous 48 h.</p></div>
       <div class="card" style="margin-top:16px"><h3>Pendant ce temps</h3><ul class="small" style="padding-left:18px;margin:0"><li>Préparez l'original de votre permis et de votre carte grise.</li><li>Vérifiez que votre assurance couvre le transport de passagers.</li><li>Lisez la charte : ponctualité, courtoisie, aucun paiement hors application.</li></ul></div>
       <div id="news" class="stack" style="margin-top:16px"></div>`);
     renderNews(view.querySelector('#news'), { audience: 'DRIVERS', limit: 2 });
@@ -37,7 +37,7 @@ async function needDriver(ctx) {
 async function applicationForm(ctx, u) {
   const rejected = u.driver?.status === 'REJECTED';
   const root = ctx.set(`<div class="welcome driver"><p class="small" style="margin:0;font-weight:700">Devenir chauffeur partenaire</p><h1>Roulez, transportez, gagnez.</h1>
-      <p class="small muted" style="margin:6px 0 0">Bokk Yoon fixe les prix et vous verse votre part après chaque mission, sur Wave ou Orange Money. Vous n'avez rien à encaisser.</p></div>
+      <p class="small muted" style="margin:6px 0 0">Démando fixe les prix et vous verse votre part après chaque mission, sur Wave ou Orange Money. Vous n'avez rien à encaisser.</p></div>
     ${rejected ? `<div class="error" style="margin-top:12px">Votre dossier est à compléter : ${esc(u.driver.review_note || '')}</div>` : ''}
     <form class="card" id="af" style="margin-top:16px" novalidate>${errBox}
       <h3>Vous</h3>
@@ -65,7 +65,7 @@ async function applicationForm(ctx, u) {
         <div class="field"><label for="pv">Moyen de paiement</label><select id="pv" name="payoutProvider"><option value="WAVE">Wave</option><option value="ORANGE_MONEY">Orange Money</option><option value="FREE_MONEY">Free Money</option></select></div>
         <div class="field"><label for="pp">Numéro</label><input id="pp" name="payoutPhone" type="tel" value="${esc(u.phone)}"></div>
       </div>
-      <label class="check small"><input type="checkbox" name="charter"> Je m'engage à respecter la charte Bokk Yoon : ponctualité, sécurité, courtoisie, aucun paiement en dehors de l'application. Je sais que l'équipe peut suspendre mon compte en cas de manquement.</label>
+      <label class="check small"><input type="checkbox" name="charter"> Je m'engage à respecter la charte Démando : ponctualité, sécurité, courtoisie, aucun paiement en dehors de l'application. Je sais que l'équipe peut suspendre mon compte en cas de manquement.</label>
       <button class="btn btn-primary btn-block" type="submit" style="margin-top:14px">Envoyer mon dossier</button>
     </form>`);
   root.querySelector('#af').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => {
@@ -117,7 +117,7 @@ async function home(ctx) {
     <div class="row" style="margin-top:10px;gap:8px"><a class="btn btn-ghost btn-sm" href="#/gains">Relevé du mois</a><a class="btn btn-ghost btn-sm" href="#/aide">Écrire au propriétaire</a></div>
     <h3 style="margin-top:22px">Prochains trajets</h3>
     ${d.upcoming.length ? `<div class="stack">${d.upcoming.map((t) => `<a class="card card-link" href="#/trajet/${t.id}"><div class="row between"><strong>${esc(t.origin)} → ${esc(t.dest)}</strong>${badge(TRIP, t.status)}</div>
-      <div class="small muted">${fmtDT(t.departureAt)} · ${t.confirmed} réservation(s) confirmée(s) · ${t.seatsLeft}/${t.seatsTotal} places · ${t.parcelKgLeft}/${t.parcelKgTotal} kg libres</div></a>`).join('')}</div>` : '<div class="card empty"><strong>Aucun trajet prévu</strong><p class="small">Publiez les trajets que vous faites déjà : Bokk Yoon vous envoie passagers et colis.</p></div>'}
+      <div class="small muted">${fmtDT(t.departureAt)} · ${t.confirmed} réservation(s) confirmée(s) · ${t.seatsLeft}/${t.seatsTotal} places · ${t.parcelKgLeft}/${t.parcelKgTotal} kg libres</div></a>`).join('')}</div>` : '<div class="card empty"><strong>Aucun trajet prévu</strong><p class="small">Publiez les trajets que vous faites déjà : Démando vous envoie passagers et colis.</p></div>'}
     <div class="row between" style="margin-top:22px"><h3 style="margin:0">Infos chauffeurs</h3><a class="small" href="#/actualites">Tout voir</a></div>
     <div id="news" class="stack" style="margin-top:10px"></div>`);
   renderAlerts(root.querySelector('#alerts'), u.city ? [u.city] : null);
@@ -128,7 +128,7 @@ async function home(ctx) {
 async function publish(ctx) {
   const u = await needDriver(ctx); if (!u) return;
   const tomorrow = addDays(today(), 1);
-  const root = ctx.set(`<h2>Publier un trajet</h2><p class="muted small">Le prix payé par les clients est fixé par Bokk Yoon. Voici ce que vous recevez.</p>
+  const root = ctx.set(`<h2>Publier un trajet</h2><p class="muted small">Le prix payé par les clients est fixé par Démando. Voici ce que vous recevez.</p>
     <form class="card" id="tf" novalidate>${errBox}
       <div class="grid grid-2">
         <div class="field"><label for="o">Départ</label><select id="o" name="origin" required>${cityOptions(u.city || 'Dakar')}</select></div>
@@ -282,7 +282,7 @@ async function gains(ctx) {
   const e = await api('GET', '/driver/earnings');
   const T = e.totals;
   const months = Array.from({ length: 6 }, (_, i) => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); return d.toISOString().slice(0, 7); });
-  const root = ctx.set(`<div class="row between"><h2 style="margin:0">Mes gains</h2><span class="small">Matricule ${refTag(u.ref)}</span></div><p class="muted small">Bokk Yoon encaisse le paiement des clients et vous verse votre part sur ${esc(PROVIDERS[u.driver.payout_provider])} (${esc(u.driver.payout_phone)}).</p>
+  const root = ctx.set(`<div class="row between"><h2 style="margin:0">Mes gains</h2><span class="small">Matricule ${refTag(u.ref)}</span></div><p class="muted small">Démando encaisse le paiement des clients et vous verse votre part sur ${esc(PROVIDERS[u.driver.payout_provider])} (${esc(u.driver.payout_phone)}).</p>
     <div class="grid grid-2">
       <div class="card"><div class="xs muted">Disponible</div><div class="kpi tnum money-in">${fcfa(T.available)}</div><div class="xs muted">Versé par l'équipe lors du prochain paiement</div></div>
       <div class="card"><div class="xs muted">En attente (24 h après la mission)</div><div class="kpi tnum">${fcfa(T.pending)}</div>${T.held ? `<div class="xs" style="color:var(--terra)">${fcfa(T.held)} bloqués par une réclamation</div>` : ''}</div>
@@ -352,5 +352,5 @@ let bell = { refresh() {} };
   bell = mountBell(document.getElementById('bell'), () => {});
   router.render();
   const c = await getCompany();
-  if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.href = waLink(c.whatsapp, 'Bonjour, je suis chauffeur Bokk Yoon. '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire au propriétaire sur WhatsApp'); a.innerHTML = ICONS.wa; document.body.appendChild(a); }
+  if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.href = waLink(c.whatsapp, 'Bonjour, je suis chauffeur Démando. '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire au propriétaire sur WhatsApp'); a.innerHTML = ICONS.wa; document.body.appendChild(a); }
 })();

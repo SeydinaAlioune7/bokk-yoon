@@ -30,7 +30,7 @@ import { createMap, REGION_COLORS } from './map.js';
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-// Axes de lancement : prix fixes Bokk Yoon (grille du propriétaire si l'API répond, sinon formule par défaut)
+// Axes de lancement : prix fixes Démando (grille du propriétaire si l'API répond, sinon formule par défaut)
 const icon = '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M10 90 C 40 60, 70 80, 60 40 S 80 10, 95 5" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>';
 const card = (a, b, q) => { const h = Math.floor(q.durationMin / 60), m = q.durationMin % 60;
   return `<article class="corridor">${icon}<div><p class="xs" style="margin:0;opacity:.85;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Aller et retour</p><h3>${a} ↔ ${b}</h3></div>
@@ -140,12 +140,12 @@ const PICON = {
 // Contact : boutons WhatsApp / e-mail / téléphone + formulaire
 const WA = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>';
 (async () => {
-  let c = { name: 'Bokk Yoon' };
+  let c = { name: 'Démando' };
   try { c = await api('GET', '/company'); } catch { /* hors ligne */ }
   const wa = (t) => `https://wa.me/${String(c.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent(t)}`;
   const box = document.getElementById('lc-contact');
     `<p class="small" style="margin-top:12px;opacity:.9">${esc(c.hours || '')}${c.email ? ' · ' + esc(c.email) : ''}${c.address ? '<br>' + esc(c.address) : ''}</p>`;
-  if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.style.bottom = '20px'; a.href = wa('Bonjour Bokk Yoon, '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire sur WhatsApp'); a.innerHTML = WA; document.body.appendChild(a); }
+  if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.style.bottom = '20px'; a.href = wa('Bonjour Démando, '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire sur WhatsApp'); a.innerHTML = WA; document.body.appendChild(a); }
   const cf = document.getElementById('cform');
   cf.addEventListener('submit', async (e) => {
     e.preventDefault(); const err = cf.querySelector('.form-error'); err.hidden = true;

@@ -1,4 +1,4 @@
-// Bokk Yoon — rendu imprimable : factures et avoirs (3 modèles), étiquettes colis avec QR code, relevés chauffeur.
+// Démando — rendu imprimable : factures et avoirs (3 modèles), étiquettes colis avec QR code, relevés chauffeur.
 const base = new URL('./', import.meta.url);
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = (n) => `${Math.round(Number(n) || 0).toLocaleString('fr-FR')}`;
@@ -54,12 +54,12 @@ export async function renderInvoice(inv, company, { verifyUrl = '' } = {}) {
   const credit = inv.kind === 'CREDIT_NOTE', total = inv.total, vatAmount = inv.vat_amount || 0, ht = total - vatAmount;
   const st = credit ? null : STATUS[inv.status] || STATUS.PAID;
   const cu = inv.customer || {};
-  const qr = await qrSvg(verifyUrl || `${inv.number} · ${money(total)} FCFA · ${c.name || 'Bokk Yoon'}`);
+  const qr = await qrSvg(verifyUrl || `${inv.number} · ${money(total)} FCFA · ${c.name || 'Démando'}`);
   const legal = [c.legalName, c.ninea && 'NINEA ' + c.ninea, c.rccm && 'RCCM ' + c.rccm].filter(Boolean).join(' · ');
   const logo = c.logo ? `<img class="inv-logo" src="${esc(c.logo)}" alt="">` : `<span class="inv-mark" style="background:${acc}">${esc((c.name || 'B').slice(0, 1))}</span>`;
   return `<article class="inv inv-${tpl}" style="--acc:${acc}">
     <header class="inv-head">
-      <div class="inv-brand">${logo}<div><div class="inv-name">${esc(c.name || 'Bokk Yoon')}</div><div class="inv-sub">${esc(c.address || '')}</div></div></div>
+      <div class="inv-brand">${logo}<div><div class="inv-name">${esc(c.name || 'Démando')}</div><div class="inv-sub">${esc(c.address || '')}</div></div></div>
       <div class="inv-title"><div class="inv-kind">${KIND[inv.kind] || 'Facture'}</div><div class="inv-num">N° ${esc(inv.number)}</div><div class="inv-date">${dateLong(inv.issued_at)}</div></div>
     </header>
     ${st ? `<div class="inv-stamp" style="--st:${st[1]}">${st[0]}</div>` : ''}
@@ -90,7 +90,7 @@ export async function renderLabel(d, company) {
   const acc = company?.accent || '#0B6E4F';
   const qr = await qrSvg(d.trackUrl, 4);
   return `<article class="lbl" style="--acc:${acc}">
-    <header><span class="lbl-brand">${esc(company?.name || 'Bokk Yoon')}</span><span class="lbl-type">${esc(d.typeLabel || 'Colis')}${d.fragile ? ' · FRAGILE' : ''}</span></header>
+    <header><span class="lbl-brand">${esc(company?.name || 'Démando')}</span><span class="lbl-type">${esc(d.typeLabel || 'Colis')}${d.fragile ? ' · FRAGILE' : ''}</span></header>
     <div class="lbl-ref">${esc(d.ref)}</div>
     <div class="lbl-route"><div><small>De</small><strong>${esc(d.from)}</strong></div><span>→</span><div><small>À</small><strong>${esc(d.to)}</strong></div></div>
     <div class="lbl-mid"><div class="lbl-qr">${qr}</div><div class="lbl-info">
@@ -108,7 +108,7 @@ export function renderStatement(s) {
   const [y, m] = s.month.split('-').map(Number);
   const monthLabel = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   return `<article class="inv inv-${c.template || 'moderne'}" style="--acc:${acc}">
-    <header class="inv-head"><div class="inv-brand">${c.logo ? `<img class="inv-logo" src="${esc(c.logo)}" alt="">` : `<span class="inv-mark" style="background:${acc}">${esc((c.name || 'B')[0])}</span>`}<div><div class="inv-name">${esc(c.name || 'Bokk Yoon')}</div><div class="inv-sub">${esc(c.address || '')}</div></div></div>
+    <header class="inv-head"><div class="inv-brand">${c.logo ? `<img class="inv-logo" src="${esc(c.logo)}" alt="">` : `<span class="inv-mark" style="background:${acc}">${esc((c.name || 'B')[0])}</span>`}<div><div class="inv-name">${esc(c.name || 'Démando')}</div><div class="inv-sub">${esc(c.address || '')}</div></div></div>
       <div class="inv-title"><div class="inv-kind">Relevé de gains</div><div class="inv-num">${esc(monthLabel)}</div><div class="inv-date">édité le ${dateLong(new Date().toISOString())}</div></div></header>
     <section class="inv-parties"><div><div class="inv-lbl">Chauffeur partenaire</div><strong>${esc(s.driver.name)}</strong><br>Matricule ${esc(s.driver.ref)}<br>${esc(s.driver.phone)}${s.driver.city ? '<br>' + esc(s.driver.city) : ''}</div>
       <div><div class="inv-lbl">Versements sur</div><strong>${esc(PROV[s.driver.payoutProvider] || s.driver.payoutProvider)}</strong><br>${esc(s.driver.payoutPhone)}</div></section>

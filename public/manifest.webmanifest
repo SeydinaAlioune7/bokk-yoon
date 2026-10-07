@@ -1,6 +1,6 @@
 {
-  "name": "Bokk Yoon",
-  "short_name": "Bokk Yoon",
+  "name": "Démando",
+  "short_name": "Démando",
   "description": "Covoiturage et envoi de colis entre particuliers au Senegal",
   "start_url": "/app/",
   "scope": "/",

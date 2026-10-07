@@ -1,4 +1,4 @@
-// Carte Bokk Yoon : Leaflet (fourni localement) + fond OpenStreetMap + découpage administratif officiel du Sénégal
+// Carte Démando : Leaflet (fourni localement) + fond OpenStreetMap + découpage administratif officiel du Sénégal
 // (régions, départements, arrondissements — Gouvernement du Sénégal / OCHA, CC BY 3.0 IGO).
 import { CITIES } from './core.js';
 

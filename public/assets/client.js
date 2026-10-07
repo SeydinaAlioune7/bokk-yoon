@@ -1,4 +1,4 @@
-// Bokk Yoon — espace client (voyageurs et expéditeurs).
+// Démando — espace client (voyageurs et expéditeurs).
 import {
   fmtDur, api, token, resetDemo, esc, fmtDay, fmtTime, fmtDT, fmtDate, ago, today, addDays, initials, catLabel, qs, stars, fcfa, cityOptions,
   toast, sheet, formData, errBox, submitting, on, act, BOOKING, PACKAGE, TRIP, PROVIDERS, badge, routeHtml, personHtml, confirmSheet,
@@ -31,7 +31,7 @@ async function home(ctx) {
   const u = await loadMe();
   const root = ctx.set(`
     <div class="welcome"><p class="small" style="margin:0;font-weight:700;color:var(--primary)">${u ? 'Na nga def, ' + esc(u.name.split(' ')[0]) + ' !' : 'Dalal ak jàmm · Bienvenue'}</p>
-      <h1>Où allez-vous aujourd'hui ?</h1><p class="small muted" style="margin:6px 0 0">Prix fixe annoncé avant de payer. Chauffeurs vérifiés par Bokk Yoon.</p></div>
+      <h1>Où allez-vous aujourd'hui ?</h1><p class="small muted" style="margin:6px 0 0">Prix fixe annoncé avant de payer. Chauffeurs vérifiés par Démando.</p></div>
     <div id="alerts" class="stack" style="margin-top:12px" hidden></div>
     <div class="tiles" style="margin-top:14px">
       <a class="tile t1" href="#/recherche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14l-1.5-6a2 2 0 0 0-2-1.5h-7a2 2 0 0 0-2 1.5z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/></svg><strong>Je voyage</strong><span class="small">Réserver une place</span></a>
@@ -198,7 +198,7 @@ async function newPackage(ctx) {
     if (!f.origin.value || !f.dest.value || f.origin.value === f.dest.value) { root.querySelector('#est').textContent = 'Choisissez deux villes différentes.'; return; }
     try {
       const q = await api('GET', '/quote?' + qs({ from: f.origin.value, to: f.dest.value, weightKg: f.weightKg.value, type: f.type.value }));
-      root.querySelector('#est').innerHTML = q.type.mode === 'FLAT' ? `Prix forfaitaire « ${esc(q.type.label)} » : <strong>${fcfa(q.parcel)}</strong> (${q.distanceKm} km, sans pesée).` : `Prix fixe Bokk Yoon : <strong>${fcfa(q.parcel)}</strong> pour ${String(q.weightKg).replace('.', ',')} kg (${q.distanceKm} km).`;
+      root.querySelector('#est').innerHTML = q.type.mode === 'FLAT' ? `Prix forfaitaire « ${esc(q.type.label)} » : <strong>${fcfa(q.parcel)}</strong> (${q.distanceKm} km, sans pesée).` : `Prix fixe Démando : <strong>${fcfa(q.parcel)}</strong> pour ${String(q.weightKg).replace('.', ',')} kg (${q.distanceKm} km).`;
     } catch { /* ignore */ }
   };
   ['origin', 'dest', 'weightKg'].forEach((n) => f[n].addEventListener('change', est));
@@ -285,7 +285,7 @@ async function bookingPage(ctx, id) {
       ${['PENDING_PAYMENT', 'PAID'].includes(b.status) ? '<button class="btn btn-danger btn-sm" id="cancel">Annuler</button>' : ''}
       ${['PAID', 'IN_PROGRESS', 'COMPLETED'].includes(b.status) && !b.dispute ? '<button class="btn btn-ghost btn-sm" id="dispute">Réclamation</button>' : ''}
       ${['PAID', 'IN_PROGRESS', 'COMPLETED'].includes(b.status) ? '<button class="btn btn-ghost btn-sm" id="report">Signaler le chauffeur</button>' : ''}
-      <a class="btn btn-ghost btn-sm" href="#/aide?${qs({ ref: b.ref, subject: 'Réservation ' + b.ref })}">Écrire à Bokk Yoon</a>
+      <a class="btn btn-ghost btn-sm" href="#/aide?${qs({ ref: b.ref, subject: 'Réservation ' + b.ref })}">Écrire à Démando</a>
     </div>
     <div class="card" style="margin-top:16px"><h3>Besoin d'aide sur cette réservation ?</h3><div id="contact"></div></div>`);
   contactButtons(`au sujet de ma réservation ${b.ref}`).then((h) => { root.querySelector('#contact').innerHTML = h; });
@@ -339,14 +339,14 @@ async function bookingPage(ctx, id) {
   } else if (b.myReview) after.innerHTML = `<p class="small muted">Votre avis : ${'★'.repeat(b.myReview.rating)} ${esc(b.myReview.comment)}</p>`;
   if (b.status === 'COMPLETED') {
     const fb = document.createElement('div'); fb.style.marginTop = '16px'; after.after(fb);
-    if (b.feedback) fb.innerHTML = `<div class="success small">Merci pour votre retour sur Bokk Yoon (${b.feedback.score}/10).</div>`;
+    if (b.feedback) fb.innerHTML = `<div class="success small">Merci pour votre retour sur Démando (${b.feedback.score}/10).</div>`;
     else {
-      fb.innerHTML = `<form class="card" id="nps" novalidate>${errBox}<h3>Votre retour sur Bokk Yoon</h3>
-        <p class="small">Recommanderiez-vous Bokk Yoon à un proche ? <span class="muted">(0 = pas du tout, 10 = certainement)</span></p>
+      fb.innerHTML = `<form class="card" id="nps" novalidate>${errBox}<h3>Votre retour sur Démando</h3>
+        <p class="small">Recommanderiez-vous Démando à un proche ? <span class="muted">(0 = pas du tout, 10 = certainement)</span></p>
         <div class="nps" role="radiogroup" aria-label="Note de 0 à 10">${Array.from({ length: 11 }, (_, n) => `<label><input type="radio" name="score" value="${n}"><span>${n}</span></label>`).join('')}</div>
         <div class="field" style="margin-top:12px"><label for="lk">Ce que vous avez aimé</label><textarea id="lk" name="liked" rows="2" maxlength="1000"></textarea></div>
         <div class="field"><label for="im">Ce que nous devons améliorer</label><textarea id="im" name="improve" rows="2" maxlength="1000"></textarea></div>
-        <p class="xs muted">Ce formulaire va directement au propriétaire de Bokk Yoon, pas au chauffeur.</p>
+        <p class="xs muted">Ce formulaire va directement au propriétaire de Démando, pas au chauffeur.</p>
         <button class="btn btn-primary btn-block" type="submit">Envoyer mon retour</button></form>`;
       fb.querySelector('#nps').addEventListener('submit', (e) => { e.preventDefault(); const d = formData(e.target);
         if (d.score === undefined || d.score === '') { toast('Choisissez une note de 0 à 10'); return; }
@@ -362,14 +362,14 @@ async function bookingPage(ctx, id) {
   root.querySelector('#dispute')?.addEventListener('click', () => sheet(`<form novalidate>${errBox}<h3>Réclamation</h3>
       <div class="field"><label for="r">Motif</label><select id="r" name="reason">${parcel ? '<option value="DAMAGED">Colis endommagé</option><option value="LOST">Colis perdu</option><option value="NOT_DELIVERED">Colis non livré</option>' : ''}<option value="NO_SHOW">Chauffeur absent</option><option value="PAYMENT">Problème de paiement</option><option value="OTHER">Autre</option></select></div>
       <div class="field"><label for="dd">Détails</label><textarea id="dd" name="details" required placeholder="Que s'est-il passé ?"></textarea></div>
-      <p class="xs muted">L'équipe Bokk Yoon examine votre demande sous 72 h. Le paiement du chauffeur est bloqué pendant l'examen.</p>
+      <p class="xs muted">L'équipe Démando examine votre demande sous 72 h. Le paiement du chauffeur est bloqué pendant l'examen.</p>
       <div class="row"><button class="btn btn-primary" type="submit">Envoyer</button><button class="btn btn-ghost" type="button" data-close>Annuler</button></div></form>`,
     (s, close) => s.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); submitting(e.target, async (d) => { await api('POST', `/client/bookings/${id}/dispute`, d); close(); toast('Réclamation envoyée'); ctx.render(); }); })));
   root.querySelector('#report')?.addEventListener('click', () => reportSheet(id));
   chat(root, id, ctx);
 }
 export function reportSheet(id) {
-  sheet(`<form novalidate>${errBox}<h3>Signaler un comportement</h3><p class="small muted">Votre signalement est confidentiel et traité par l'équipe Bokk Yoon, qui peut avertir, suspendre ou bloquer le compte concerné.</p>
+  sheet(`<form novalidate>${errBox}<h3>Signaler un comportement</h3><p class="small muted">Votre signalement est confidentiel et traité par l'équipe Démando, qui peut avertir, suspendre ou bloquer le compte concerné.</p>
     <div class="field"><label for="rc">Motif</label><select id="rc" name="category"><option value="COMPORTEMENT">Comportement irrespectueux</option><option value="RETARD">Retard important</option><option value="CONDUITE">Conduite dangereuse</option><option value="PAIEMENT_HORS_APP">Demande de paiement hors application</option><option value="FRAUDE">Fraude ou tentative d'arnaque</option><option value="AUTRE">Autre</option></select></div>
     <div class="field"><label for="rd">Ce qui s'est passé</label><textarea id="rd" name="details" required minlength="10"></textarea></div>
     <div class="row"><button class="btn btn-danger" type="submit">Envoyer le signalement</button><button class="btn btn-ghost" type="button" data-close>Annuler</button></div></form>`,
@@ -388,18 +388,18 @@ export async function chat(root, id, ctx) {
   const timer = setInterval(load, 10000); ctx.cleanup(() => clearInterval(timer));
   root.querySelector('#mf')?.addEventListener('submit', async (e) => {
     e.preventDefault(); const inp = e.target.body; if (!inp.value.trim()) return;
-    try { const r = await api('POST', `/bookings/${id}/messages`, { body: inp.value }); inp.value = ''; if (r.masked) toast('Numéro masqué : restez dans la messagerie Bokk Yoon'); load(); } catch (er) { toast(er.message); }
+    try { const r = await api('POST', `/bookings/${id}/messages`, { body: inp.value }); inp.value = ''; if (r.masked) toast('Numéro masqué : restez dans la messagerie Démando'); load(); } catch (er) { toast(er.message); }
   });
 }
 const trackUrl = (b) => new URL(`#/suivi/${b.trackToken}`, location.href.split('#')[0]).href;
 const trackShare = (b) => `<div style="margin-top:14px"><p class="small"><strong>Pour le destinataire :</strong> il a reçu un SMS. Vous pouvez aussi lui envoyer ce lien (suivi en direct et code de réception).</p>
-  <div class="row"><a class="btn btn-sun btn-sm" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Ton colis Bokk Yoon arrive. Suivi et code de réception : ' + trackUrl(b))}">Partager sur WhatsApp</a>
+  <div class="row"><a class="btn btn-sun btn-sm" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Ton colis Démando arrive. Suivi et code de réception : ' + trackUrl(b))}">Partager sur WhatsApp</a>
   <button class="btn btn-ghost btn-sm" data-copy="${esc(trackUrl(b))}">Copier le lien</button></div></div>`;
 const bindShare = (r) => on(r, '[data-copy]', 'click', async (e) => { try { await navigator.clipboard.writeText(e.target.dataset.copy); toast('Copié'); } catch { toast(e.target.dataset.copy, 6000); } });
 async function paySheet(b, ctx) {
   let pm = null; try { pm = await api('GET', '/payment-methods'); } catch { /* hors ligne */ }
   if (pm?.mode === 'QR') return qrPaySheet(b, ctx, pm);
-  sheet(`<h3>Paiement sécurisé</h3><p class="small muted">Montant : <strong id="amt">${fcfa(b.price)}</strong>, encaissé par Bokk Yoon. Remboursé si le trajet est annulé par le chauffeur.</p>
+  sheet(`<h3>Paiement sécurisé</h3><p class="small muted">Montant : <strong id="amt">${fcfa(b.price)}</strong>, encaissé par Démando. Remboursé si le trajet est annulé par le chauffeur.</p>
     <form id="promo" class="row" style="flex-wrap:nowrap;margin-bottom:12px"><input name="code" placeholder="Code promo" aria-label="Code promo" value="${esc(b.promoCode || '')}" style="text-transform:uppercase" autocomplete="off"><button class="btn btn-ghost btn-sm" type="submit">Appliquer</button></form>
     <p class="xs" id="promo-msg" style="margin:-6px 0 12px">${b.discount ? `Code ${esc(b.promoCode)} : − ${fcfa(b.discount)}` : ''}</p>
     <div class="stack" id="prov">${[['WAVE', 'Wave', '#1DC4FF'], ['ORANGE_MONEY', 'Orange Money', '#FF7900'], ['FREE_MONEY', 'Free Money', '#E3001B'], ['CARD', 'Carte bancaire', '#1F5F99']].map(([k, n, c]) =>
@@ -429,7 +429,7 @@ async function paySheet(b, ctx) {
 function qrPaySheet(b, ctx, pm) {
   const methods = [['WAVE', 'Wave', '#1DC4FF', pm.wave], ['ORANGE_MONEY', 'Orange Money', '#FF7900', pm.orange]].filter((m) => m[3]);
   const mobile = matchMedia('(max-width: 820px)').matches;
-  sheet(`<h3>Paiement</h3><p class="small muted" style="margin:0">Réservation ${refTag(b.ref)} · paiement encaissé par ${esc(methods[0]?.[3].name || 'Bokk Yoon')}.</p>
+  sheet(`<h3>Paiement</h3><p class="small muted" style="margin:0">Réservation ${refTag(b.ref)} · paiement encaissé par ${esc(methods[0]?.[3].name || 'Démando')}.</p>
     <form id="promo" class="row" style="flex-wrap:nowrap;margin:12px 0"><input name="code" placeholder="Code promo" aria-label="Code promo" value="${esc(b.promoCode || '')}" style="text-transform:uppercase" autocomplete="off"><button class="btn btn-ghost btn-sm" type="submit">Appliquer</button></form>
     <p class="xs" id="promo-msg" style="margin:-6px 0 8px">${b.discount ? `Code ${esc(b.promoCode)} : − ${fcfa(b.discount)}` : ''}</p>
     <div class="pill-nav" id="pmt" style="margin-bottom:12px">${methods.map(([k, l, c], i) => `<button type="button" class="btn btn-ghost btn-sm ${i === 0 ? 'on' : ''}" data-k="${k}"><span style="width:12px;height:12px;border-radius:4px;background:${c};display:inline-block"></span>${l}</button>`).join('')}</div>
@@ -450,7 +450,7 @@ function qrPaySheet(b, ctx, pm) {
           <li>Payez exactement <strong>${fcfa(b.price)}</strong>${d.number ? ` à <strong>${esc(d.name)}</strong>` : ''}.</li><li>Copiez l'<strong>ID de la transaction</strong> depuis l'historique ${name} et collez-le ci-dessous.</li></ol>`;
       s.querySelector('#txhint').textContent = prov === 'WAVE' ? 'Dans Wave : touchez la transaction dans l\'historique, l\'ID commence souvent par T_.' : 'Dans Orange Money : l\'ID figure dans le SMS de confirmation.';
     };
-    if (!methods.length) { s.querySelector('#pbody').innerHTML = '<div class="error">Aucun moyen de paiement n\'est configuré. Contactez Bokk Yoon.</div>'; s.querySelector('#cf').hidden = true; return; }
+    if (!methods.length) { s.querySelector('#pbody').innerHTML = '<div class="error">Aucun moyen de paiement n\'est configuré. Contactez Démando.</div>'; s.querySelector('#cf').hidden = true; return; }
     draw();
     s.querySelector('#pmt').addEventListener('click', (e) => { const x = e.target.closest('[data-k]'); if (!x) return; prov = x.dataset.k; s.querySelectorAll('#pmt [data-k]').forEach((y) => y.classList.toggle('on', y === x)); draw(); });
     bindShare(s);
@@ -511,7 +511,7 @@ async function profile(ctx) {
   api('GET', '/config').then((c) => { if (c.mode === 'demo') { const r = root.querySelector('#reset'); r.hidden = false; r.onclick = () => confirmSheet('Réinitialiser la démo ?', 'Toutes les données de démonstration de cet appareil seront effacées.', async () => resetDemo()); } });
   const pb = root.querySelector('#partner');
   if (!partner.partner) {
-    pb.innerHTML = `<h3>Vous avez une boutique en ligne ?</h3><p class="small muted">Proposez la livraison Bokk Yoon à vos clients : prix en direct, création d'envoi, suivi par webhooks. <a href="#/partenaires">Documentation API</a></p>
+    pb.innerHTML = `<h3>Vous avez une boutique en ligne ?</h3><p class="small muted">Proposez la livraison Démando à vos clients : prix en direct, création d'envoi, suivi par webhooks. <a href="#/partenaires">Documentation API</a></p>
       <form id="paf" novalidate>${errBox}<div class="grid grid-2"><div class="field"><label for="sn">Nom de la boutique</label><input id="sn" name="name" required></div>
       <div class="field"><label for="wh">Adresse de webhook (https, facultative)</label><input id="wh" name="webhookUrl" type="url" placeholder="https://maboutique.sn/webhooks/bokkyoon"></div></div>
       <button class="btn btn-ghost" type="submit">Créer mes clés API</button></form>`;
@@ -539,7 +539,7 @@ async function memberPage(ctx, id) {
   ctx.set(`<a href="javascript:history.back()" class="small">← Retour</a>
     <div class="row" style="gap:14px;margin-top:10px;flex-wrap:nowrap"><span class="avatar" style="width:64px;height:64px;font-size:1.4rem">${esc(initials(m.name))}</span>
       <div><h2 style="margin:0">${esc(m.name)}</h2><span class="small muted">${m.ref ? refTag(m.ref) + ' · ' : ''}${m.role === 'driver' ? 'Chauffeur' : 'Membre'} depuis ${fmtDate(m.memberSince)}${m.city ? ' · ' + esc(m.city) : ''}</span></div></div>
-    <div class="row" style="margin-top:12px"><span class="badge b-green">Téléphone vérifié</span>${m.role === 'driver' && m.verified ? '<span class="badge b-green">Identité, permis et véhicule vérifiés par Bokk Yoon</span>' : ''}</div>
+    <div class="row" style="margin-top:12px"><span class="badge b-green">Téléphone vérifié</span>${m.role === 'driver' && m.verified ? '<span class="badge b-green">Identité, permis et véhicule vérifiés par Démando</span>' : ''}</div>
     ${m.bio ? `<p style="margin-top:12px">« ${esc(m.bio)} »</p>` : ''}${m.vehicle ? `<p class="small muted">Véhicule : ${esc(m.vehicle.label)}</p>` : ''}
     <div class="stat-row" style="margin-top:16px">
       <div class="card"><div class="kpi-sm">${m.stats.ratingCount ? String(m.stats.ratingAvg).replace('.', ',') + ' ★' : '—'}</div><div class="xs muted">${m.stats.ratingCount} avis</div></div>
@@ -552,14 +552,14 @@ async function memberPage(ctx, id) {
 export async function trackPage(ctx, tk) {
   const t = await api('GET', '/track/' + tk);
   const i = ['PAID', 'IN_PROGRESS', 'COMPLETED'].indexOf(t.status);
-  const root = ctx.set(`<p class="small muted" style="margin:0">Suivi de colis Bokk Yoon</p><h2>Bonjour ${esc(t.recipientName)}, un colis arrive pour vous</h2>
+  const root = ctx.set(`<p class="small muted" style="margin:0">Suivi de colis Démando</p><h2>Bonjour ${esc(t.recipientName)}, un colis arrive pour vous</h2>
     <div class="card">${routeHtml(t.from, t.to, 'départ ' + fmtDT(t.departureAt))}<p class="small muted" style="margin:10px 0 0">${String(t.weightKg).replace('.', ',')} kg · ${esc(catLabel(t.category))} · transporté par ${esc(t.driverName)}</p></div>
     <div id="map" style="margin-top:12px"></div><p class="xs muted" id="cap" style="margin-top:6px"></p>
     <div class="card" style="margin-top:16px"><ol class="timeline"><li class="${i >= 0 ? 'done' : ''}">Envoi confirmé et payé</li>
       <li class="${i >= 1 ? 'done' : i === 0 ? 'now' : ''}">Pris en charge par le chauffeur${t.pickupAt ? ' · ' + fmtDT(t.pickupAt) : ''}</li>
       <li class="${i >= 2 ? 'done' : i === 1 ? 'now' : ''}">Livré${t.deliveredAt ? ' · ' + fmtDT(t.deliveredAt) : ''}</li></ol></div>
     ${t.deliveryCode ? `<div class="card" style="margin-top:16px;border-color:var(--primary)"><h3>Votre code de réception</h3><p class="small">Donnez-le au chauffeur <strong>uniquement quand vous avez le colis en main</strong>, après l'avoir vérifié.</p><div class="code-box">${esc(t.deliveryCode)}</div></div>` : ''}
-    ${t.status === 'COMPLETED' ? '<div class="success" style="margin-top:16px">Colis livré. Merci d\'avoir choisi Bokk Yoon !</div>' : ''}`);
+    ${t.status === 'COMPLETED' ? '<div class="success" style="margin-top:16px">Colis livré. Merci d\'avoir choisi Démando !</div>' : ''}`);
   const mp = await createMap(root.querySelector('#map'), { height: 240 });
   if (mp) {
     ctx.cleanup(() => mp.destroy());
@@ -575,7 +575,7 @@ export async function trackPage(ctx, tk) {
 async function calculator(ctx) {
   const p = ctx.params;
   const types = (await api('GET', '/parcel-types')).results;
-  const root = ctx.set(`<h2>Calculatrice de prix</h2><p class="muted small">Le prix affiché est celui que vous payez : fixé par Bokk Yoon, sans négociation, sans frais cachés.</p>
+  const root = ctx.set(`<h2>Calculatrice de prix</h2><p class="muted small">Le prix affiché est celui que vous payez : fixé par Démando, sans négociation, sans frais cachés.</p>
     <form class="card" id="cf" novalidate>
       <div class="grid grid-2">
         <div class="field"><label for="cfrom">Départ</label><select id="cfrom" name="from">${cityOptions(p.from || 'Dakar')}</select></div>
@@ -625,7 +625,7 @@ async function newsIndex(ctx) {
 
 async function partnersDoc(ctx) {
   const o = location.origin;
-  ctx.set(`<h2>API partenaires</h2><p class="muted">Pour les boutiques en ligne : livrez vos clients entre villes, au prix fixé par Bokk Yoon.</p>
+  ctx.set(`<h2>API partenaires</h2><p class="muted">Pour les boutiques en ligne : livrez vos clients entre villes, au prix fixé par Démando.</p>
     <div class="card"><h3>Principe</h3><ol class="small" style="padding-left:18px;margin:0">
       <li><strong>Éligibilité</strong> : villes et poids → éligible ou non, avec le prix.</li>
       <li><strong>Création de l'envoi</strong> après la commande : attribué au meilleur trajet compatible.</li>
@@ -671,5 +671,5 @@ let bell = { refresh() {} };
   bell = mountBell(document.getElementById('bell'), () => {});
   router.render();
   const c = await getCompany();
-  if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.href = waLink(c.whatsapp, 'Bonjour Bokk Yoon, '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire sur WhatsApp'); a.innerHTML = ICONS.wa; document.body.appendChild(a); }
+  if (c.whatsapp) { const a = document.createElement('a'); a.className = 'wa-float'; a.href = waLink(c.whatsapp, 'Bonjour Démando, '); a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', 'Écrire sur WhatsApp'); a.innerHTML = ICONS.wa; document.body.appendChild(a); }
 })();

@@ -1,4 +1,4 @@
-﻿// Bokk Yoon â€” API mÃ©tier (modÃ¨le opÃ©rateur, espaces sÃ©parÃ©s client / chauffeur / Ã©quipe).
+﻿// Démando â€” API mÃ©tier (modÃ¨le opÃ©rateur, espaces sÃ©parÃ©s client / chauffeur / Ã©quipe).
 // ExÃ©cutÃ©e par le Worker Cloudflare (src/worker.js) (env.DB = D1) et par le mode dÃ©mo navigateur (sql.js imitant D1).
 
 import {
@@ -62,7 +62,7 @@ async function sendEmail(env, to, subject, text) {
   try {
     if (env.RESEND_API_KEY) {
       const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
-        body: JSON.stringify({ from: env.EMAIL_FROM || 'Bokk Yoon <notifications@bokkyoon.sn>', to: [to], subject, text }) });
+        body: JSON.stringify({ from: env.EMAIL_FROM || 'Démando <notifications@bokkyoon.sn>', to: [to], subject, text }) });
       return 'HTTP_' + r.status;
     }
     if (env.EMAIL_WEBHOOK_URL) { const r = await fetch(env.EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ to, subject, text }) }); return 'HTTP_' + r.status; }
@@ -183,7 +183,7 @@ async function capturePayment(q, env, b, t, provider, providerRef, actorId, { si
   if (b.package_id) {
     await q.run("UPDATE packages SET status = 'PAID' WHERE id = ?", b.package_id);
     const p = await q.first('SELECT recipient_phone FROM packages WHERE id = ?', b.package_id);
-    await sendSms(env, p.recipient_phone, `Bokk Yoon : un colis arrive pour vous. Suivi et code de rÃ©ception : ${env.APP_URL || ''}/app/#/suivi/${track}`);
+    await sendSms(env, p.recipient_phone, `Démando : un colis arrive pour vous. Suivi et code de rÃ©ception : ${env.APP_URL || ''}/app/#/suivi/${track}`);
   }
   await notify(q, b.driver_id, b.kind === 'PARCEL' ? 'Nouveau colis confirmÃ©' : 'Nouvelle rÃ©servation confirmÃ©e', `${b.from_city} â†’ ${b.to_city} Â· ${fmtDay(t.departure_at)} Â· vous recevrez ${b.driver_pay.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ')} FCFA`, `#/mission/${b.id}`, 'success');
   await audit(q, actorId, 'payment.captured', 'booking', b.id, { provider, amount: b.price, simulated, verifiedBy });
@@ -290,19 +290,19 @@ async function deleteAccount(q, env, u, actorId, reason) {
   await audit(q, actorId, 'user.deleted', 'user', u.id, { ref: u.ref, role: u.role, reason, by: actorId === u.id ? 'lui-mÃªme' : 'Ã©quipe' });
 }
 function statusMessage(u) {
-  if (u.status === 'blocked') return 'Ce compte est bloquÃ©. Contactez le support Bokk Yoon.';
+  if (u.status === 'blocked') return 'Ce compte est bloquÃ©. Contactez le support Démando.';
   if (u.status === 'suspended') return `Ce compte est suspendu${u.suspended_until ? ' jusqu\'au ' + new Date(u.suspended_until).toLocaleDateString('fr-FR') : ''}. Motif : ${u.status_reason || 'non prÃ©cisÃ©'}.`;
   return null;
 }
 const need = (u, ...roles) => {
   if (!u) fail(401, 'AUTH_REQUIRED', 'Connectez-vous pour continuer.');
-  if (!roles.includes(u.role)) fail(403, 'WRONG_SPACE', `Action rÃ©servÃ©e Ã  ${roles.includes('driver') ? 'l\'espace chauffeur' : roles.includes('client') ? 'l\'espace client' : 'l\'Ã©quipe Bokk Yoon'}.`);
+  if (!roles.includes(u.role)) fail(403, 'WRONG_SPACE', `Action rÃ©servÃ©e Ã  ${roles.includes('driver') ? 'l\'espace chauffeur' : roles.includes('client') ? 'l\'espace client' : 'l\'Ã©quipe Démando'}.`);
   return u;
 };
 async function needApprovedDriver(q, u) {
   need(u, 'driver');
   const dp = await q.first('SELECT status FROM driver_profiles WHERE user_id = ?', u.id);
-  if (dp?.status !== 'APPROVED') fail(403, 'DRIVER_NOT_APPROVED', 'Votre dossier chauffeur doit Ãªtre validÃ© par l\'Ã©quipe Bokk Yoon.');
+  if (dp?.status !== 'APPROVED') fail(403, 'DRIVER_NOT_APPROVED', 'Votre dossier chauffeur doit Ãªtre validÃ© par l\'Ã©quipe Démando.');
   return u;
 }
 const needSuper = (u) => need(u, 'superadmin');
@@ -373,7 +373,7 @@ async function cancelBooking(q, env, b, who, reason, actorId) {
   }
   await releaseCapacity(q, b);
   if (b.package_id) await q.run("UPDATE packages SET status = 'CREATED' WHERE id = ?", b.package_id);
-  if (who !== 'client') await notify(q, b.customer_id, 'RÃ©servation annulÃ©e', `${b.from_city} â†’ ${b.to_city} : ${who === 'driver' ? 'le chauffeur a dÃ» annuler' : 'annulÃ©e par Bokk Yoon'}.${refund ? ' Remboursement : ' + refund.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ') + ' FCFA.' : ''}`, `#/reservation/${b.id}`, 'warning');
+  if (who !== 'client') await notify(q, b.customer_id, 'RÃ©servation annulÃ©e', `${b.from_city} â†’ ${b.to_city} : ${who === 'driver' ? 'le chauffeur a dÃ» annuler' : 'annulÃ©e par Démando'}.${refund ? ' Remboursement : ' + refund.toLocaleString('fr-FR').replace(/[\u202F\u00A0]/g, ' ') + ' FCFA.' : ''}`, `#/reservation/${b.id}`, 'warning');
   if (who !== 'driver' && b.status === 'PAID') await notify(q, b.driver_id, 'RÃ©servation annulÃ©e', `${b.from_city} â†’ ${b.to_city} Â· ${b.kind === 'PARCEL' ? 'colis' : b.seats + ' place(s)'}`, `#/mission/${b.id}`, 'warning');
   if (b.package_id) await notifyPartner(q, env, b.id, 'shipment.cancelled');
   return { status: b.status === 'PAID' ? 'REFUNDED' : 'CANCELLED', refund, driverCompensation: driverComp };
@@ -383,7 +383,7 @@ async function applySanction(q, env, target, type, reason, actor, days) {
   const now = nowIso();
   if (type === 'WARNING') {
     await q.run('UPDATE users SET warnings = warnings + 1 WHERE id = ?', target.id);
-    await notify(q, target.id, 'Avertissement de Bokk Yoon', reason, '', 'warning');
+    await notify(q, target.id, 'Avertissement de Démando', reason, '', 'warning');
   } else if (type === 'SUSPENSION' || type === 'BLOCK') {
     const until = type === 'SUSPENSION' ? addHours(24 * Math.max(1, Math.min(365, days || 7))) : null;
     await q.run('UPDATE users SET status = ?, suspended_until = ?, status_reason = ? WHERE id = ?', type === 'BLOCK' ? 'blocked' : 'suspended', until, reason, target.id);
@@ -524,16 +524,16 @@ async function seedDemo(q) {
   await q.run("INSERT INTO incidents (id, reporter_id, target_id, category, details, created_at) VALUES (?,?,?,'RETARD',?,?)", uid(), clients[1], D[3].id, 'Le chauffeur est arrivÃ© 40 minutes aprÃ¨s l\'heure prÃ©vue sans prÃ©venir.', iso(now - 2 * 86400000));
   // ActualitÃ©s et alertes (contenu d'exemple, modifiable dans l'espace Ã©quipe)
   const news = [
-    ['ANNONCE', 'ALL', 'Bokk Yoon ouvre son pilote sur l\'axe Dakar â€“ ThiÃ¨s', 'Premiers trajets, premiers colis : voici comment fonctionne le pilote et comment y participer.',
-      'Bokk Yoon dÃ©marre sur l\'axe le plus frÃ©quentÃ© du pays. Les voyageurs rÃ©servent une place Ã  prix fixe, les expÃ©diteurs confient un colis Ã  un chauffeur vÃ©rifiÃ© qui fait dÃ©jÃ  la route.\n\nPendant le pilote, notre Ã©quipe accompagne chaque premier trajet par tÃ©lÃ©phone. Vos retours nous aident Ã  ouvrir les prochains axes : Touba, Saint-Louis, Kaolack et Ziguinchor.'],
+    ['ANNONCE', 'ALL', 'Démando ouvre son pilote sur l\'axe Dakar â€“ ThiÃ¨s', 'Premiers trajets, premiers colis : voici comment fonctionne le pilote et comment y participer.',
+      'Démando dÃ©marre sur l\'axe le plus frÃ©quentÃ© du pays. Les voyageurs rÃ©servent une place Ã  prix fixe, les expÃ©diteurs confient un colis Ã  un chauffeur vÃ©rifiÃ© qui fait dÃ©jÃ  la route.\n\nPendant le pilote, notre Ã©quipe accompagne chaque premier trajet par tÃ©lÃ©phone. Vos retours nous aident Ã  ouvrir les prochains axes : Touba, Saint-Louis, Kaolack et Ziguinchor.'],
     ['CONSEIL', 'CLIENTS', 'Bien emballer son colis : 6 rÃ¨gles simples', 'Carton rigide, poids exact, photo nette : ce qui Ã©vite 9 litiges sur 10.',
       '1. Utilisez un carton ou un sac rigide et fermÃ©.\n2. Pesez le colis : le poids dÃ©clarÃ© est vÃ©rifiÃ© Ã  l\'enlÃ¨vement.\n3. Prenez une photo nette avant de le remettre.\n4. ProtÃ©gez les objets fragiles et cochez Â« fragile Â».\n5. Ã‰crivez le nom et le numÃ©ro du destinataire sur le colis.\n6. Ne confiez jamais d\'objet interdit : le chauffeur peut refuser.'],
     ['SECURITE', 'ALL', 'Remise contre code : ne donnez jamais votre code trop tÃ´t', 'Le code Ã  6 chiffres est votre signature. Voici quand et Ã  qui le donner.',
-      'L\'expÃ©diteur donne son code au chauffeur seulement aprÃ¨s avoir remis le colis. Le destinataire donne le sien seulement quand il a le colis en main et l\'a vÃ©rifiÃ©.\n\nL\'Ã©quipe Bokk Yoon ne vous demandera jamais votre code par tÃ©lÃ©phone.'],
+      'L\'expÃ©diteur donne son code au chauffeur seulement aprÃ¨s avoir remis le colis. Le destinataire donne le sien seulement quand il a le colis en main et l\'a vÃ©rifiÃ©.\n\nL\'Ã©quipe Démando ne vous demandera jamais votre code par tÃ©lÃ©phone.'],
     ['ROUTE', 'ALL', 'Grands Ã©vÃ©nements : rÃ©servez vos places Ã  l\'avance', 'Magal, Gamou, fÃªtes de fin d\'annÃ©e : la demande explose, les places partent vite.',
       'Lors des grands rassemblements, les trajets vers Touba, Tivaouane, Kaolack ou la Casamance se remplissent plusieurs jours avant. RÃ©servez tÃ´t et suivez les alertes route dans l\'application.'],
     ['CONSEIL', 'DRIVERS', 'Chauffeurs : comment sont calculÃ©s vos gains', 'Votre rÃ©munÃ©ration est affichÃ©e avant chaque trajet et versÃ©e sur Wave ou Orange Money.',
-      'Pour chaque place ou colis, votre rÃ©munÃ©ration est fixÃ©e par Bokk Yoon et affichÃ©e avant que vous publiiez le trajet. Elle devient disponible 24 heures aprÃ¨s la remise, puis l\'Ã©quipe la verse sur votre compte Wave ou Orange Money.'],
+      'Pour chaque place ou colis, votre rÃ©munÃ©ration est fixÃ©e par Démando et affichÃ©e avant que vous publiiez le trajet. Elle devient disponible 24 heures aprÃ¨s la remise, puis l\'Ã©quipe la verse sur votre compte Wave ou Orange Money.'],
   ];
   let i = 0;
   for (const [cat, aud, title, summary, body] of news) {
@@ -619,7 +619,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
     const ref = await setRef(q, 'tickets', id);
     await notifyTeam(q, `Nouveau message ${ref}`, `${name} : ${subject}`, `#/messages/${id}`);
     const c = (await getSettings(q)).company;
-    const mail = await sendEmail(env, env.OWNER_EMAIL || c.email, `[Bokk Yoon] ${ref} Â· ${subject}`, `${name} (${phone || ''} ${email || ''})\nCatÃ©gorie : ${cat}\n${body.bookingRef ? 'RÃ©servation : ' + body.bookingRef + '\n' : ''}\n${message}`);
+    const mail = await sendEmail(env, env.OWNER_EMAIL || c.email, `[Démando] ${ref} Â· ${subject}`, `${name} (${phone || ''} ${email || ''})\nCatÃ©gorie : ${cat}\n${body.bookingRef ? 'RÃ©servation : ' + body.bookingRef + '\n' : ''}\n${message}`);
     return ok({ ref, id, emailForward: mail }, 201);
   }
   if (is('GET', 'coverage')) {
@@ -705,7 +705,7 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       // NumÃ©ro dÃ©clarÃ© propriÃ©taire (ADMIN_PHONES) : il peut toujours entrer dans l'espace Ã©quipe, mÃªme s'il a d'abord servi Ã  un compte client.
       const ownerTakeover = space === 'admin' && admins.includes(phone) && (existing.role === 'client' || existing.role === 'driver');
       if (!ownerTakeover && !SPACE_ROLES[space].includes(existing.role)) fail(403, 'WRONG_SPACE', `Ce numÃ©ro est rattachÃ© Ã  ${SPACE_LABEL[roleSpace(existing.role)]}. Chaque espace est sÃ©parÃ© : utilisez ${SPACE_LABEL[roleSpace(existing.role)]}${existing.role === 'client' ? ' ou un autre numÃ©ro pour devenir chauffeur' : ''}.`);
-    } else if (space === 'admin' && !admins.includes(phone)) fail(403, 'TEAM_ONLY', 'AccÃ¨s rÃ©servÃ© Ã  l\'Ã©quipe Bokk Yoon.');
+    } else if (space === 'admin' && !admins.includes(phone)) fail(403, 'TEAM_ONLY', 'AccÃ¨s rÃ©servÃ© Ã  l\'Ã©quipe Démando.');
     if (seg[2] === 'request') {
       
     const row = await q.first('SELECT * FROM otps WHERE phone = ?', phone);
@@ -715,9 +715,9 @@ async function commonRoutes({ q, env, me, method, seg, is, r1, query, body, head
       const code = randomDigits(6);
       await q.run('DELETE FROM otps WHERE phone = ?', phone);
       await q.run('INSERT INTO otps (phone, code_hash, attempts, expires_at, sent_count, window_start) VALUES (?,?,0,?,?,?)', phone, await sha256(phone + ':' + code), new Date(Date.now() + 5 * 60000).toISOString(), sent, winStart);
-      await sendSms(env, phone, `Bokk Yoon : votre code est ${code}. Il expire dans 5 minutes. Ne le partagez avec personne.`);
+      await sendSms(env, phone, `Démando : votre code est ${code}. Il expire dans 5 minutes. Ne le partagez avec personne.`);
       const emailDest = body.email ? str(body.email, 120).toLowerCase() : (existing?.email || null);
-      if (emailDest) await sendEmail(env, emailDest, 'Code de validation Bokk Yoon', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
+      if (emailDest) await sendEmail(env, emailDest, 'Code de validation Démando', `Votre code de connexion est : ${code}\n\nIl expire dans 5 minutes.`);
       return ok({ sent: true, phone, isNew: !existing });
     }
     if (space === 'admin' && env.ADMIN_PASSWORD && body.password !== env.ADMIN_PASSWORD) fail(403, 'WRONG_PASSWORD', 'Mot de passe équipe incorrect.');
@@ -900,7 +900,7 @@ async function clientRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bo
     return ok({ status: 'CANCELLED' });
   }
 
-  // RÃ©servation = paiement immÃ©diat (prix fixÃ© par Bokk Yoon)
+  // RÃ©servation = paiement immÃ©diat (prix fixÃ© par Démando)
   if (is('POST', 'client', 'bookings')) {
     const t = await q.first("SELECT t.* FROM trips t JOIN users d ON d.id = t.driver_id WHERE t.id = ? AND d.status = 'active'", str(body.tripId, 64));
     if (!t || !['PUBLISHED', 'FULL'].includes(t.status) || t.departure_at < now) fail(404, 'TRIP_UNAVAILABLE', 'Trajet indisponible.');
@@ -1006,7 +1006,7 @@ async function clientRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bo
       const ref = await setRef(q, 'payment_claims', id);
       await notifyTeam(q, `Paiement Ã  vÃ©rifier ${ref}`, `${fmtAmount(b.price)} FCFA ${provider === 'WAVE' ? 'Wave' : 'Orange Money'} Â· ${b.ref} Â· ID ${txn}`, '#/encaissements');
       const c = (await getSettings(q)).company;
-      await sendEmail(env, env.OWNER_EMAIL || c.email, `[Bokk Yoon] Paiement Ã  vÃ©rifier ${ref} Â· ${fmtAmount(b.price)} FCFA`, `RÃ©servation ${b.ref} (${b.from_city} â†’ ${b.to_city})\nClient : ${u.name} (${u.phone})\nMoyen : ${provider}\nID de transaction : ${txn}\nMontant attendu : ${fmtAmount(b.price)} FCFA\n\nVÃ©rifiez dans votre application ${provider === 'WAVE' ? 'Wave' : 'Orange Money'}, puis validez dans l'espace Ã©quipe â†’ Encaissements.`);
+      await sendEmail(env, env.OWNER_EMAIL || c.email, `[Démando] Paiement Ã  vÃ©rifier ${ref} Â· ${fmtAmount(b.price)} FCFA`, `RÃ©servation ${b.ref} (${b.from_city} â†’ ${b.to_city})\nClient : ${u.name} (${u.phone})\nMoyen : ${provider}\nID de transaction : ${txn}\nMontant attendu : ${fmtAmount(b.price)} FCFA\n\nVÃ©rifiez dans votre application ${provider === 'WAVE' ? 'Wave' : 'Orange Money'}, puis validez dans l'espace Ã©quipe â†’ Encaissements.`);
       await audit(q, u.id, 'payment.claimed', 'booking', b.id, { provider, txn, amount: b.price });
       return ok({ id, ref, status: 'PENDING' }, 201);
     }
@@ -1398,7 +1398,7 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
     await q.run("UPDATE trips SET status = 'CANCELLED' WHERE id = ?", t.id);
     const bs = await q.all("SELECT * FROM bookings WHERE trip_id = ? AND status IN ('PENDING_PAYMENT','PAID')", t.id);
     for (const b of bs) await cancelBooking(q, env, b, 'admin', reason, a.id);
-    await notify(q, t.driver_id, 'Trajet annulÃ© par Bokk Yoon', `${t.origin} â†’ ${t.dest} : ${reason}`, '', 'warning');
+    await notify(q, t.driver_id, 'Trajet annulÃ© par Démando', `${t.origin} â†’ ${t.dest} : ${reason}`, '', 'warning');
     await audit(q, a.id, 'admin.trip_cancelled', 'trip', t.id, { reason });
     return ok({ ok: true, affected: bs.length });
   }
@@ -1801,8 +1801,8 @@ async function adminRoutes({ q, env, me, method, is, r1, r2, r3, seg, query, bod
       await q.run('INSERT INTO ticket_messages (id, ticket_id, author_id, from_team, body, created_at) VALUES (?,?,?,1,?,?)', uid(), t.id, a.id, text, nowIso());
       await q.run("UPDATE tickets SET status = 'ANSWERED', updated_at = ? WHERE id = ?", nowIso(), t.id);
       let channel = 'in-app';
-      if (t.user_id) await notify(q, t.user_id, `RÃ©ponse de Bokk Yoon Â· ${t.ref}`, text.slice(0, 120), t.user_role === 'driver' ? `#/aide/${t.id}` : `#/aide/${t.id}`, 'message');
-      else { if (t.email) channel = 'email:' + await sendEmail(env, t.email, `Bokk Yoon Â· ${t.ref} Â· ${t.subject}`, text); if (t.phone) await sendSms(env, t.phone, `Bokk Yoon ${t.ref} : ${text.slice(0, 140)}`); }
+      if (t.user_id) await notify(q, t.user_id, `RÃ©ponse de Démando Â· ${t.ref}`, text.slice(0, 120), t.user_role === 'driver' ? `#/aide/${t.id}` : `#/aide/${t.id}`, 'message');
+      else { if (t.email) channel = 'email:' + await sendEmail(env, t.email, `Démando Â· ${t.ref} Â· ${t.subject}`, text); if (t.phone) await sendSms(env, t.phone, `Démando ${t.ref} : ${text.slice(0, 140)}`); }
       await audit(q, a.id, 'ticket.replied', 'ticket', t.ref, { channel });
       return ok({ ok: true, channel });
     }

@@ -1,4 +1,4 @@
--- Bokk Yoon — schéma D1 (SQLite), version 3 : modèle opérateur, espaces séparés, références, factures, support.
+-- Démando — schéma D1 (SQLite), version 3 : modèle opérateur, espaces séparés, références, factures, support.
 -- Montants en FCFA entiers. Dates en ISO 8601 UTC.
 
 CREATE TABLE IF NOT EXISTS users (
@@ -136,8 +136,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   list_price INTEGER,                                 -- prix avant code promo
   discount INTEGER NOT NULL DEFAULT 0,
   promo_code TEXT,
-  price INTEGER NOT NULL CHECK (price >= 0),          -- payé par le client à Bokk Yoon
-  driver_pay INTEGER NOT NULL CHECK (driver_pay >= 0), -- reversé par Bokk Yoon au chauffeur
+  price INTEGER NOT NULL CHECK (price >= 0),          -- payé par le client à Démando
+  driver_pay INTEGER NOT NULL CHECK (driver_pay >= 0), -- reversé par Démando au chauffeur
   status TEXT NOT NULL DEFAULT 'PENDING_PAYMENT' CHECK (status IN ('PENDING_PAYMENT','PAID','IN_PROGRESS','COMPLETED','CANCELLED','EXPIRED','DISPUTED','REFUNDED')),
   expires_at TEXT,
   pickup_code TEXT, delivery_code TEXT, track_token TEXT,
@@ -318,7 +318,7 @@ CREATE TABLE IF NOT EXISTS feedback (
   created_at TEXT NOT NULL, UNIQUE (booking_id, user_id)
 );
 
--- Codes promo (la remise est prise sur la marge Bokk Yoon, pas sur la part chauffeur)
+-- Codes promo (la remise est prise sur la marge Démando, pas sur la part chauffeur)
 CREATE TABLE IF NOT EXISTS promo_codes (
   id TEXT PRIMARY KEY, code TEXT NOT NULL UNIQUE, label TEXT NOT NULL DEFAULT '',
   kind TEXT NOT NULL CHECK (kind IN ('PERCENT','FIXED')), value INTEGER NOT NULL CHECK (value > 0),

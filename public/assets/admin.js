@@ -1,4 +1,4 @@
-﻿// Bokk Yoon — espace équipe (propriétaire = super-admin, membres de l'équipe = admin).
+﻿// Démando — espace équipe (propriétaire = super-admin, membres de l'équipe = admin).
 import {
   fmtDur, api, token, esc, fmtDay, fmtTime, fmtDT, fmtDate, ago, qs, stars, fcfa, cityOptions, initials,
   toast, sheet, errBox, submitting, on, act, BOOKING, TRIP, PAYOUT, PROVIDERS, badge, confirmSheet,
@@ -79,10 +79,10 @@ async function dash(ctx) {
   const u = await guard(ctx); if (!u) return;
   const s = await api('GET', '/admin/stats');
   const sum14 = s.days.reduce((a, d) => a + d.revenue, 0), m14 = s.days.reduce((a, d) => a + d.margin, 0);
-  const root = ctx.set(`<h2>Tableau de bord</h2><p class="muted small">Bokk Yoon encaisse chaque réservation, garde sa marge et reverse la part des chauffeurs.</p>
+  const root = ctx.set(`<h2>Tableau de bord</h2><p class="muted small">Démando encaisse chaque réservation, garde sa marge et reverse la part des chauffeurs.</p>
     <div class="grid grid-4">
       ${kpi('Encaissé (net des remboursements)', fcfa(s.revenue))}
-      ${kpi('Marge Bokk Yoon', fcfa(s.margin), s.revenue ? Math.round((s.margin / s.revenue) * 100) + ' % du chiffre d\'affaires' : '')}
+      ${kpi('Marge Démando', fcfa(s.margin), s.revenue ? Math.round((s.margin / s.revenue) * 100) + ' % du chiffre d\'affaires' : '')}
       ${kpi('À verser maintenant', fcfa(s.availableToPay), `sur ${fcfa(s.owedDrivers)} dus aux chauffeurs`, '#/paiements')}
       ${kpi('Déjà versé aux chauffeurs', fcfa(s.paidDrivers))}
     </div>
@@ -179,7 +179,7 @@ async function member(ctx, id) {
       ${x.status !== 'blocked' && isSuper() ? '<button class="btn btn-danger btn-sm" data-a="block">Bloquer définitivement</button>' : ''}
       <button class="btn btn-ghost btn-sm" data-a="note">Ajouter une note</button>
       ${isSuper() && ['client', 'driver'].includes(x.role) && x.status !== 'blocked' ? '<button class="btn btn-ghost btn-sm" data-a="delete" style="color:var(--terra)">Supprimer le compte</button>' : ''}
-      <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${waLink(x.phone, `Bonjour ${(x.name || '').split(' ')[0]}, ici l'équipe Bokk Yoon. `)}">WhatsApp</a>${x.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(x.email)}">E-mail</a>` : ''}</div>` : ''}
+      <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${waLink(x.phone, `Bonjour ${(x.name || '').split(' ')[0]}, ici l'équipe Démando. `)}">WhatsApp</a>${x.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(x.email)}">E-mail</a>` : ''}</div>` : ''}
     <div class="grid grid-4" style="margin-top:16px">
       ${kpi('Note', d.stats.ratingCount ? 'ÿà ' + String(d.stats.ratingAvg).replace('.', ',') : '—', d.stats.ratingCount + ' avis')}
       ${kpi(x.role === 'driver' ? 'Trajets terminés' : 'Trajets et envois', x.role === 'driver' ? d.stats.trips : d.stats.asClient, x.role === 'driver' ? d.stats.parcels + ' colis livrés' : '')}
@@ -501,8 +501,8 @@ async function ticketAdmin(ctx, id) {
     <div class="grid grid-2">
       <div class="card"><h3>Expéditeur</h3><p class="small" style="margin:0"><strong>${esc(t.name)}</strong>${t.user_ref ? ` · <a href="#/membre/${t.user_id}">${esc(t.user_ref)}</a>` : ' · visiteur du site'}<br>${t.phone ? 'Tél. ' + esc(t.phone) + '<br>' : ''}${t.email ? esc(t.email) : ''}</p></div>
       <div class="card"><h3>Répondre directement</h3><div class="row">
-        ${t.phone ? `<a class="btn btn-sm" style="background:#25D366;color:#fff" target="_blank" rel="noopener" href="${waLink(t.phone, `Bonjour ${first}, ici Bokk Yoon au sujet de votre message ${t.ref} (${t.subject}). `)}">${ICONS.wa.replace('<svg', '<svg width="16" height="16"')} WhatsApp</a>` : ''}
-        ${t.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(t.email)}?subject=${encodeURIComponent(`Re: ${t.subject} [${t.ref}]`)}&body=${encodeURIComponent(`Bonjour ${first},\n\n\n\nL'équipe Bokk Yoon`)}">E-mail</a>` : ''}
+        ${t.phone ? `<a class="btn btn-sm" style="background:#25D366;color:#fff" target="_blank" rel="noopener" href="${waLink(t.phone, `Bonjour ${first}, ici Démando au sujet de votre message ${t.ref} (${t.subject}). `)}">${ICONS.wa.replace('<svg', '<svg width="16" height="16"')} WhatsApp</a>` : ''}
+        ${t.email ? `<a class="btn btn-ghost btn-sm" href="mailto:${esc(t.email)}?subject=${encodeURIComponent(`Re: ${t.subject} [${t.ref}]`)}&body=${encodeURIComponent(`Bonjour ${first},\n\n\n\nL'équipe Démando`)}">E-mail</a>` : ''}
         ${t.phone ? `<a class="btn btn-ghost btn-sm" href="tel:${esc(t.phone)}">Appeler</a>` : ''}</div></div>
     </div>
     <div class="card" style="margin-top:16px"><h3>Conversation</h3><div class="chat" style="max-height:none">${t.messages.map((m) => `<div class="msg ${m.from_team ? 'mine' : ''}"><span class="xs" style="opacity:.75">${m.from_team ? esc(m.author || 'Équipe') : esc(t.name)} · ${fmtDT(m.created_at)}</span><br>${esc(m.body).replace(/\n/g, '<br>')}</div>`).join('')}</div>
@@ -519,7 +519,7 @@ async function feedbackPage(ctx) {
   const n = r.results.length, pro = r.results.filter((x) => x.score >= 9).length, det = r.results.filter((x) => x.score <= 6).length;
   const nps = n ? Math.round(((pro - det) / n) * 100) : null;
   const dist = Array.from({ length: 11 }, (_, i) => r.results.filter((x) => x.score === i).length), mx = Math.max(1, ...dist);
-  const root = ctx.set(`<h2>Retours clients</h2><p class="muted small">Formulaire envoyé au client à la fin de chaque trajet : ½ Recommanderiez-vous Bokk Yoon ? ╗ (0 à 10). Une note de 6 ou moins vous est signalée.</p>
+  const root = ctx.set(`<h2>Retours clients</h2><p class="muted small">Formulaire envoyé au client à la fin de chaque trajet : ½ Recommanderiez-vous Démando ? ╗ (0 à 10). Une note de 6 ou moins vous est signalée.</p>
     <div class="grid grid-4">${kpi('NPS', nps === null ? '—' : (nps > 0 ? '+' : '') + nps, 'promoteurs − détracteurs')}${kpi('Promoteurs (9-10)', pro, n ? Math.round((pro / n) * 100) + ' %' : '')}${kpi('Passifs (7-8)', n - pro - det)}${kpi('Détracteurs (0-6)', det, n ? Math.round((det / n) * 100) + ' %' : '')}</div>
     <div class="card" style="margin-top:16px"><h3>Répartition des notes</h3><div style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px;align-items:end;height:140px">${dist.map((v, i) => `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%" title="${v} retour(s) à ${i}/10"><span class="xs tnum">${v || ''}</span><span style="width:100%;height:${Math.round((v / mx) * 100)}%;min-height:${v ? 4 : 0}px;border-radius:4px 4px 0 0;background:${i >= 9 ? 'var(--primary)' : i >= 7 ? 'var(--sun)' : 'var(--terra)'}"></span><span class="xs muted">${i}</span></div>`).join('')}</div>
       <p class="xs muted" style="margin:8px 0 0">Vert : promoteurs · jaune : passifs · rouge : détracteurs.</p></div>
@@ -600,7 +600,7 @@ async function cashPage(ctx) {
     <p class="xs muted" data-read="${key}" style="margin:6px 0 0"></p>
     <div class="grid grid-2" style="margin-top:10px">
       <div class="field"><label for="${key}-num">Numéro ${label}</label><input id="${key}-num" name="${key}_number" value="${esc(m.number)}" placeholder="77 000 00 00" ${ro}></div>
-      <div class="field"><label for="${key}-name">Nom affiché au client</label><input id="${key}-name" name="${key}_name" value="${esc(m.name)}" placeholder="Bokk Yoon" ${ro}></div></div>
+      <div class="field"><label for="${key}-name">Nom affiché au client</label><input id="${key}-name" name="${key}_name" value="${esc(m.name)}" placeholder="Démando" ${ro}></div></div>
     <div class="field"><label for="${key}-link">Lien de paiement (rempli automatiquement si le QR en contient un)</label><input id="${key}-link" name="${key}_link" value="${esc(m.link)}" placeholder="${key === 'wave' ? 'https://pay.wave.com/m/…' : 'https://…'}" ${ro}><div class="hint">Sur téléphone, le client ne peut pas scanner l'écran qu'il regarde : ce lien ouvre directement l'application.</div></div>
   </div>`;
   const root = ctx.set(`<h2>Encaissements Wave / Orange Money</h2>
@@ -700,7 +700,7 @@ async function company(ctx) {
     <div class="designer">
       <form class="card" id="cf" novalidate>${errBox}
         <h3>Identité</h3>
-        ${f('name', 'Nom commercial', c.name)}${f('legalName', 'Raison sociale', c.legalName, 'Bokk Yoon SARL')}
+        ${f('name', 'Nom commercial', c.name)}${f('legalName', 'Raison sociale', c.legalName, 'Démando SARL')}
         <div class="grid grid-2">${f('ninea', 'NINEA', c.ninea)}${f('rccm', 'RCCM', c.rccm, 'SN-DKR-2026-B-…')}</div>
         ${f('address', 'Adresse', c.address, 'Sacré-C┼ôur 3, Dakar')}
         <h3 style="margin-top:8px">Contact (WhatsApp, e-mail)</h3>
@@ -800,7 +800,7 @@ async function calculator(ctx) {
     const ca = s * q.clientSeat + p * q.clientParcel, dr = s * q.driverSeat + p * q.driverParcel;
     box.innerHTML = `<p class="small muted">${q.distanceKm} km · ~${fmtDur(q.durationMin)} · ${q.source === 'grille' ? 'grille par axe' : 'formule au km'}</p>
       <div class="table-wrap"><table><tbody><tr><td>Encaissé auprès des clients</td><td class="tnum" style="text-align:right"><strong>${fcfa(ca)}</strong></td></tr><tr><td>À verser au chauffeur</td><td class="tnum" style="text-align:right">${fcfa(dr)}</td></tr>
-      <tr><td><strong>Marge Bokk Yoon</strong></td><td class="tnum money-in" style="text-align:right"><strong>${fcfa(ca - dr)}</strong></td></tr><tr><td class="small muted">Taux de marge</td><td class="small muted" style="text-align:right">${ca ? Math.round(((ca - dr) / ca) * 100) : 0} %</td></tr></tbody></table></div>`;
+      <tr><td><strong>Marge Démando</strong></td><td class="tnum money-in" style="text-align:right"><strong>${fcfa(ca - dr)}</strong></td></tr><tr><td class="small muted">Taux de marge</td><td class="small muted" style="text-align:right">${ca ? Math.round(((ca - dr) / ca) * 100) : 0} %</td></tr></tbody></table></div>`;
   };
   const marginCalc = () => {
     const price = num('#m1'), paid = Math.round(price * (1 - num('#m3') / 100)), drv = Math.round(price * num('#m2') / 100), fee = Math.round(paid * num('#m4') / 100), mg = paid - drv - fee;
