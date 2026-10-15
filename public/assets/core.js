@@ -162,14 +162,14 @@ export function quote(settings, overrides, A, B) {
   return {
     distanceKm: Math.round(km), durationMin: durationMin(km), source: o ? 'grille' : 'formule',
     clientSeat: seat, clientParcel: parcel,
-    driverSeat: o?.driver_seat ?? Math.round((seat * share) / 50) * 50,
-    driverParcel: o?.driver_parcel ?? Math.round((parcel * share) / 50) * 50,
+    driverSeat: o?.driver_seat ?? Math.round(seat * share),
+    driverParcel: o?.driver_parcel ?? Math.round(parcel * share),
     extraKgPct: p.parcelExtraKgPct,
   };
 }
 export function parcelAmounts(q, weightKg) {
   const factor = 1 + (q.extraKgPct / 100) * Math.max(0, Math.ceil(weightKg) - 5);
-  const r = (x) => Math.round((x * factor) / 50) * 50;
+  const r = (x) => Math.round(x * factor);
   return { client: r(q.clientParcel), driver: r(q.driverParcel) };
 }
 
