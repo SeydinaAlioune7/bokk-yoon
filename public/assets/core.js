@@ -115,7 +115,7 @@ export const DEFAULT_SETTINGS = {
   // puis déclare l'ID de transaction ; l'équipe vérifie et confirme. (API Wave Business : voir README.)
   payment: {
     mode: 'AUTO', // AUTO : QR code réel une fois déployé sur Cloudflare, simulation en démo
-    wave: { enabled: true, qr: 'assets/pay/wave-qr.png', link: 'https://qr.wave.com/iVVNfc25fa0c0VTRCd3hEV1hQ/BqvVGl/An40gh/p', number: '', name: 'Démando' },
+    wave: { enabled: true, qr: '', link: 'https://pay.wave.com/m/M_sn_VegxLj_lNAvA/c/sn/', number: '', name: 'Démando' },
     orange: { enabled: false, qr: '', link: '', number: '', name: '' },
     reviewMinutes: 30, instructions: 'Payez le montant exact, puis indiquez l\'ID de la transaction. Votre réservation est confirmée dès vérification.',
   },

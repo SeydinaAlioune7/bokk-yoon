@@ -439,15 +439,23 @@ function qrPaySheet(b, ctx, pm) {
       <div class="field"><label for="pp">Numéro qui a payé</label><input id="pp" name="payerPhone" type="tel" inputmode="tel" placeholder="77 123 45 67"></div>
       <button class="btn btn-primary btn-block" type="submit">J'ai payé : envoyer pour vérification</button></form>
     <p class="xs muted" style="margin-top:10px">${esc(pm.instructions || '')} Vérification en général sous ${pm.reviewMinutes} min.</p>`, (s, close) => {
-    let prov = methods[0]?.[0];
+    let prov = methods[0]?.[0]; const paid = {};
     const draw = () => {
       const m = methods.find((x) => x[0] === prov), d = m[3], name = m[1];
+      const payHref = d.link ? (prov === 'WAVE' ? d.link + (d.link.includes('?') ? '&' : '?') + 'amount=' + Math.round(b.price) : d.link) : '';
       s.querySelector('#pbody').innerHTML = `<div class="pay-qr"><div class="small muted">Montant exact à payer</div><div class="pay-amount tnum" id="amt">${fcfa(b.price)}</div>
         ${d.qr ? `<img src="${esc(qrSrc(d.qr))}" alt="QR code ${name} de ${esc(d.name)}" style="margin-top:10px">` : ''}
         <div class="small" style="margin-top:8px"><strong>${esc(d.name)}</strong>${d.number ? ' · ' + esc(d.number) : ''}</div>
-        <div class="row" style="justify-content:center;margin-top:10px">${d.link ? `<a class="btn btn-primary btn-sm" href="${esc(d.link)}" target="_blank" rel="noopener">Ouvrir ${name}</a>` : ''}${d.qr ? `<a class="btn btn-ghost btn-sm" href="${esc(qrSrc(d.qr))}" download="qr-${prov.toLowerCase()}-bokk-yoon.png">Enregistrer le QR</a>` : ''}${d.number ? `<button type="button" class="btn btn-ghost btn-sm" data-copy="${esc(String(d.number).replace(/\s/g, ''))}">Copier le numéro</button>` : ''}</div></div>
-        <ol class="pay-steps small">${mobile && d.link ? `<li>Appuyez sur <strong>Ouvrir ${name}</strong>${d.qr ? ' (ou enregistrez le QR et scannez-le depuis votre galerie)' : ''}.</li>` : `<li>Ouvrez ${name} sur votre téléphone et scannez ce QR code.</li>`}
+        <div class="row" style="justify-content:center;margin-top:10px">${d.link ? `<a class="btn btn-primary btn-block" id="paylink" href="${esc(payHref)}" target="_blank" rel="noopener">Payer ${fcfa(b.price)} avec ${name}</a>` : ''}${d.qr ? `<a class="btn btn-ghost btn-sm" href="${esc(qrSrc(d.qr))}" download="qr-${prov.toLowerCase()}-bokk-yoon.png">Enregistrer le QR</a>` : ''}${d.number ? `<button type="button" class="btn btn-ghost btn-sm" data-copy="${esc(String(d.number).replace(/\s/g, ''))}">Copier le numéro</button>` : ''}</div></div>
+        <ol class="pay-steps small">${d.link ? `<li>Appuyez sur <strong>Payer ${fcfa(b.price)} avec ${name}</strong> : ${name} s'ouvre avec le montant.</li>` : `<li>Ouvrez ${name} sur votre téléphone et scannez ce QR code.</li>`}
           <li>Payez exactement <strong>${fcfa(b.price)}</strong>${d.number ? ` à <strong>${esc(d.name)}</strong>` : ''}.</li><li>Copiez l'<strong>ID de la transaction</strong> depuis l'historique ${name} et collez-le ci-dessous.</li></ol>`;
+      const cfm = s.querySelector('#cf'), cbtn = cfm.querySelector('button[type=submit]');
+      const lockForm = !!d.link && !paid[prov];
+      cfm.querySelectorAll('input,button').forEach((x) => { x.disabled = lockForm; });
+      cfm.style.opacity = lockForm ? '.5' : '';
+      const pl = s.querySelector('#paylink');
+      if (pl) pl.addEventListener('click', () => { paid[prov] = true; setTimeout(() => { cfm.querySelectorAll('input,button').forEach((x) => { x.disabled = false; }); cfm.style.opacity = ''; const h = s.querySelector('#lockmsg'); if (h) h.remove(); }, 400); });
+      if (lockForm && !s.querySelector('#lockmsg')) cfm.insertAdjacentHTML('afterbegin', '<p class="small" id="lockmsg" style="margin:0 0 10px;color:var(--terra)">Payez d\'abord avec le bouton ci-dessus, puis revenez ici pour envoyer l\'ID de la transaction.</p>');
       s.querySelector('#txhint').textContent = prov === 'WAVE' ? 'Dans Wave : touchez la transaction dans l\'historique, l\'ID commence souvent par T_.' : 'Dans Orange Money : l\'ID figure dans le SMS de confirmation.';
     };
     if (!methods.length) { s.querySelector('#pbody').innerHTML = '<div class="error">Aucun moyen de paiement n\'est configuré. Contactez Démando.</div>'; s.querySelector('#cf').hidden = true; return; }
